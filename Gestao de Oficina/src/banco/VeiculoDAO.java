@@ -61,6 +61,8 @@ public class VeiculoDAO {
         return veiculosL;
     }
 
+    // deleta veículos por placa:
+    // "DELETE FROM: veiculos WHERE placa = ?"
     public void deletar(String placa) {
         String sql = "DELETE FROM veiculos WHERE placa = ?";
         try (Connection conn = ConnectionFactory.getConnection();
@@ -76,6 +78,30 @@ public class VeiculoDAO {
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao deletar: " + e.getMessage());
+        }
+    }
+
+    // nosso querido UPTADE!!!
+    // caso erre o nome, ano ou placa, não podendo alterar o tipo (ainda hehe, mas é simples de implementar)
+    public void atualizar(Veiculo veiculo) {
+        String sql = "UPDATE veiculos SET modelo = ?, ano = ? WHERE placa = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, veiculo.getModelo());
+            stmt.setInt(2, veiculo.getAno());
+            stmt.setString(3, veiculo.getPlaca());
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            if (linhasAfetadas > 0) {
+                System.out.println("Veiculo atualizado com sucesso!");
+            } else
+                System.out.println("Nenhum veículo encontrada com a placa" + veiculo.getPlaca());
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar veículo: " + e.getMessage());
         }
     }
 }

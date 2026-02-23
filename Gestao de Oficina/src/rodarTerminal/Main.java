@@ -16,10 +16,12 @@ public class Main {
         int opcao = -1;
 
         while (opcao != 0) {
+            // menu bem basicao
             System.out.println("\n--- Oficina do Gui ---");
             System.out.println("1 - Cadastrar Carro de Teste (R32)");
             System.out.println("2 - Apagar Veículo por Placa");
             System.out.println("3 - Listar Veículos no Pátio");
+            System.out.println("3 - Atualizar Veículos no Pátio");
             System.out.println("0 - Sair");
             System.out.print("Escolha: ");
 
@@ -62,6 +64,13 @@ public class Main {
 
                     // todos os salvar/buscar/deletar estao no "banco.VeiculoDAO"
                     // e as heranças/polimorfismo estão no "modelo."
+                    break;
+
+                case 4:
+                    // ex: mudar o 370z para um 370z NISMO (18 cv a mais)
+                    System.out.println("\n--- Atualizando Veículo ---");
+                    Carro atualizado = new Carro("ABC-1234", "Nissan 370z NISMO", 2025);
+                    dao.atualizar(atualizado);
                     break;
 
                 case 0:
