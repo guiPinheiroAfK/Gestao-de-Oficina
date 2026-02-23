@@ -1,19 +1,31 @@
 package rodarTerminal;
 
 import banco.ConnectionFactory;
+import java.sql.Connection;
 import banco.VeiculoDAO;
 import modelo.Carro;
 import modelo.Veiculo;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void sincronizar(List<Veiculo> veiculos, VeiculoDAO dao) {
+        veiculos.clear();
+        veiculos.addAll(dao.buscarTodos());
+    }
+
+    public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
         VeiculoDAO dao = new VeiculoDAO();
         int opcao = -1;
+
+        // joga tudo para uma lista antes de rodar o menu
+        List<Veiculo> patioDinamico = dao.buscarTodos();
+        System.out.println("✅ " + patioDinamico.size() + " veículos carregados do banco!");
+        // faz o mesmo que o "sleep() " em C
+        TimeUnit.SECONDS.sleep(2);
 
         while (opcao != 0) {
             // menu bem basicao
@@ -21,7 +33,7 @@ public class Main {
             System.out.println("1 - Cadastrar Carro de Teste (R32)");
             System.out.println("2 - Apagar Veículo por Placa");
             System.out.println("3 - Listar Veículos no Pátio");
-            System.out.println("3 - Atualizar Veículos no Pátio");
+            System.out.println("4 - Atualizar Veículos no Pátio");
             System.out.println("0 - Sair");
             System.out.print("Escolha: ");
 
@@ -33,6 +45,7 @@ public class Main {
                     try {
                         Carro c = new Carro("ABC-4321", "Nissan R32 GTS", 1998);
                         dao.salvar(c, "CARRO");
+                        sincronizar(patioDinamico, dao); // <- <- recarrega a lista
                         // print de confirmação:
                         System.out.println("\n✅ Veículo Cadastrado com Sucesso:");
                         System.out.println("Modelo: " + c.getModelo() + " | Placa: " + c.getPlaca() + " | Ano: " + c.getAno());
@@ -49,6 +62,7 @@ public class Main {
                     System.out.print("Digite a placa para apagar: ");
                     String placa = scanner.nextLine();
                     dao.deletar(placa);
+                    sincronizar(patioDinamico, dao); // <- recarrega a lista
                     break;
 
                 case 3:
@@ -59,7 +73,7 @@ public class Main {
                     } else {
                         for (Veiculo v : lista) {
                             System.out.println("Modelo: " + v.getModelo() + " | Placa: " + v.getPlaca() + " | Ano: " + v.getAno());
-                        }
+                        } TimeUnit.SECONDS.sleep(2);
                     }
 
                     // todos os salvar/buscar/deletar estao no "banco.VeiculoDAO"
@@ -71,6 +85,7 @@ public class Main {
                     System.out.println("\n--- Atualizando Veículo ---");
                     Carro atualizado = new Carro("ABC-1234", "Nissan 370z NISMO", 2025);
                     dao.atualizar(atualizado);
+                    sincronizar(patioDinamico, dao); // <- <- recarrega a lista
                     break;
 
                 case 0:
