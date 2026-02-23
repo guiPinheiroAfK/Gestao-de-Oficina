@@ -12,6 +12,7 @@ import java.util.List;
 
 public class VeiculoDAO {
 
+    // cadastra os veículos
     public void salvar(Veiculo veiculo, String tipo) {
         String sql = "INSERT INTO veiculos (placa, modelo, ano, tipo) VALUES (?, ?, ?, ?)";
 
@@ -32,13 +33,14 @@ public class VeiculoDAO {
         }
     }
 
+    // busca eles para serem listados
     public List<Veiculo> buscarTodos() {
         String sql = "SELECT * FROM veiculos";
         List<Veiculo> veiculosL = new ArrayList<>();
 
         try (Connection conn = ConnectionFactory.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 String tipo = rs.getString("tipo");
@@ -51,12 +53,29 @@ public class VeiculoDAO {
                     veiculosL.add(new Carro(placa, modelo, ano));
                 } else
                     veiculosL.add(new Moto(placa, modelo, ano));
-                }
-
-            } catch (SQLException e) {
-                throw new RuntimeException("Erro ao listar veiculos: " + e.getMessage());
             }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar veiculos: " + e.getMessage());
+        }
         return veiculosL;
     }
 
+    public void deletar(String placa) {
+        String sql = "DELETE FROM veiculos WHERE placa = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, placa);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("Veiculo deletado com sucesso!");
+            } else
+                System.out.println("Placa não encontrada veiculo!");
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao deletar: " + e.getMessage());
+        }
+    }
 }
