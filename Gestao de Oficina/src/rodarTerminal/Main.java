@@ -3,8 +3,8 @@ package rodarTerminal;
 import banco.ConnectionFactory;
 import java.sql.Connection;
 import banco.VeiculoDAO;
-import modelo.Carro;
-import modelo.Veiculo;
+import modelo.*;
+import banco.PecaDAO;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -86,6 +86,44 @@ public class Main {
                     Carro atualizado = new Carro("ABC-1234", "Nissan 370z NISMO", 2025);
                     dao.atualizar(atualizado);
                     sincronizar(patioDinamico, dao); // <- <- recarrega a lista
+                    break;
+
+                case 5: // Novo caso para Peças
+                    System.out.println("\n--- Cadastro de Peça no Catálogo ---");
+                    System.out.print("Nome da peça: ");
+                    String nomePeca = scanner.nextLine();
+
+                    System.out.print("Valor unitário: ");
+                    double valorPeca = scanner.nextDouble();
+
+                    System.out.print("Quantidade em estoque: ");
+                    int qtdPeca = scanner.nextInt();
+
+                    if (valorPeca < 0 || qtdPeca < 0) {
+                        System.out.println("⚠️ Erro: Valores não podem ser negativos!");
+                    } else {
+                        Peca novaPeca = new Peca(nomePeca, valorPeca, qtdPeca);
+                        new PecaDAO().salvar(novaPeca);
+                        System.out.println("✅ Peça adicionada ao catálogo!");
+                    }
+                    break;
+
+                case 6:
+                    System.out.println("\n--- Simulando Orçamento ---");
+                    // Exemplo: Usando o Nissan R32 que você cadastrou no case 1
+                    Veiculo r32 = new Carro("ABC-4321", "Nissan R32 GTS", 1998);
+
+                    // Criando uma lista de peças para o serviço
+                    List<Peca> pecasParaServico = new java.util.ArrayList<>();
+                    pecasParaServico.add(new Peca("Filtro de Óleo", 50.0, 1));
+                    pecasParaServico.add(new Peca("Pastilha de Freio", 180.0, 1));
+
+                    ServicoOficina oficina = new ServicoOficina();
+                    double valorFinal = oficina.calcularOrcamento(r32, pecasParaServico);
+
+                    System.out.println("Veículo: " + r32.getModelo());
+                    System.out.println("Valor da Revisão Base: R$ " + r32.calcularValorRevisao());
+                    System.out.println("Total com Peças: R$ " + valorFinal);
                     break;
 
                 case 0:
