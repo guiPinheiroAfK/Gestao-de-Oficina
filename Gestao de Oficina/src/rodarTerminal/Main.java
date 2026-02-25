@@ -55,7 +55,7 @@ public class Main {
 
                         System.out.print("Digite o Ano: ");
                         int anoNovo = scanner.nextInt();
-                        scanner.nextLine(); // Limpa o buffer do teclado
+                        scanner.nextLine();
 
                         System.out.print("Tipo (CARRO/MOTO): ");
                         String tipoNovo = scanner.nextLine().toUpperCase();
@@ -153,20 +153,25 @@ public class Main {
 
                     if (vEncontrado != null) {
                         List<Peca> pecasParaServico = new java.util.ArrayList<>();
-                        System.out.print("Quantas peças deseja adicionar do catálogo? ");
-                        int qtd = scanner.nextInt();
+                        System.out.println("\n===TIPO DE SERVIÇOS===");
+                        System.out.println("1. Manutenção Preventiva (Revisão Periódica)");
+                        System.out.println("2. Manutenção Corretiva (Reparos)");
+                        System.out.println("3- Diagnóstico e Injeção Eletrônica");
+                        System.out.println("4. Serviços de Estética, Limpeza e Funilaria");
+                        System.out.println("5. Serviços de Pneus e Rodas");
+                        System.out.println("Escolha uma opção: ");
+                        int tipo = scanner.nextInt();
 
-                        for (int i = 0; i < qtd; i++) {
-                            System.out.print("Digite o ID da peça " + (i + 1) + ": ");
-                            int idBusca = scanner.nextInt();
-                            Peca p = new PecaDAO().buscarPorId(idBusca);
-                            if (p != null) {
-                                pecasParaServico.add(p);
-                                System.out.println("✅ " + p.getNome() + " adicionada.");
-                            } else {
-                                System.out.println("❌ Peça não encontrada.");
-                            }
+                        if(tipo == 1){
+                            System.out.println("");
+                            System.out.println("Escolha uma opção: ");
+                            int tipoCarro = scanner.nextInt();
+                        }else if(tipo == 2){
+                            System.out.println("===MENU DE SERVIÇOS (MOTO)===");
+                        }else{
+                            System.out.println("O caractere digitado não corresponde a nenhum dos tipos de veiculos");
                         }
+
 
                         ServicoOficina oficinaService = new ServicoOficina();
                         double valorFinal = oficinaService.calcularOrcamento(vEncontrado, pecasParaServico);

@@ -2,16 +2,11 @@ package banco;
 
 
 
-import modelo.OrdemServico;
+import servico.OrdemServico;
 
 import modelo.Peca;
 
 import java.sql.*;
-
-import java.util.ArrayList;
-
-import java.util.List;
-
 
 
 public class OrdemServicoDAO {

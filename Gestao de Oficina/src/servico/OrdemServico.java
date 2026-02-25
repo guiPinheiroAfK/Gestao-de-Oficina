@@ -1,4 +1,7 @@
-package modelo;
+package servico;
+
+import modelo.Peca;
+import modelo.Veiculo;
 
 import java.util.List;
 import java.util.ArrayList;
