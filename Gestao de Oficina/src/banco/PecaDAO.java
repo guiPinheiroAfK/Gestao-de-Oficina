@@ -35,4 +35,22 @@ public class PecaDAO {
         }
         return catalogo;
     }
+
+    public Peca buscarPorId(int id) {
+        String sql = "SELECT * FROM pecas WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Peca p = new Peca(rs.getString("nome"), rs.getDouble("valor"), rs.getInt("estoque"));
+                    p.setId(rs.getInt("id"));
+                    return p;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar peça: " + e.getMessage());
+        }
+        return null;
+    }
 }

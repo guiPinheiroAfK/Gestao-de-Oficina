@@ -4,10 +4,6 @@ import java.util.List;
 
 public class ServicoOficina {
 
-    /**
-     * Calcula o valor total do orçamento.
-     * Soma a taxa fixa de revisão do veículo (Polimorfismo) com o valor total das peças.
-     */
     public double calcularOrcamento(Veiculo veiculo, List<Peca> pecas) {
         // Pega o valor base dependendo se é Carro (250.0) ou Moto (120.0)
         double total = veiculo.calcularValorRevisao();
@@ -20,10 +16,6 @@ public class ServicoOficina {
         return total;
     }
 
-    /**
-     * Regra de Negócio: Valida se a Ordem de Serviço pode ser fechada.
-     * Exemplo: Não fecha sem peças ou se o veículo for muito antigo (regra hipotética).
-     */
     public boolean validarFechamentoOS(Veiculo veiculo, List<Peca> pecas) {
         if (pecas.isEmpty()) {
             System.out.println("⚠️ Alerta: Nenhuma peça foi adicionada ao serviço.");

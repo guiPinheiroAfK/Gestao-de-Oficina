@@ -30,7 +30,7 @@ public class Main {
         while (opcao != 0) {
             // menu bem basicao
             System.out.println("\n--- Oficina do Gui ---");
-            System.out.println("1 - Cadastrar Carro de Teste (R32)");
+            System.out.println("1 - Cadastrar Carro");
             System.out.println("2 - Apagar Veículo por Placa");
             System.out.println("3 - Listar Veículos no Pátio");
             System.out.println("4 - Atualizar Veículos no Pátio");
@@ -46,19 +46,35 @@ public class Main {
             switch (opcao) {
                 case 1:
                     try {
-                        Carro c = new Carro("ABC-4321", "Nissan R32 GTS", 1998);
-                        dao.salvar(c, "CARRO");
-                        sincronizar(patioDinamico, dao); // <- <- recarrega a lista
-                        // print de confirmação:
-                        System.out.println("\n✅ Veículo Cadastrado com Sucesso:");
-                        System.out.println("Modelo: " + c.getModelo() + " | Placa: " + c.getPlaca() + " | Ano: " + c.getAno());
-                    } catch (RuntimeException e) {      // ^ pega os dados do carro e printa
-                        System.out.println("⚠️ Erro: " + e.getMessage());
-                    }                                    // dps corrigir esta mensagem
-                                                         // ele envia um "already exists"
+                        System.out.println("\n--- Cadastro de Veículo ---");
+                        System.out.print("Digite a Placa: ");
+                        String placaNovo = scanner.nextLine();
 
-                    // o try serve para pegar, tipo, ja tem um carro com a placa "ABC-1234" e ao inves do
-                    // programa travar, ele pega o erro, aponta o que foi errado e volta pro menu
+                        System.out.print("Digite o Modelo: ");
+                        String modeloNovo = scanner.nextLine();
+
+                        System.out.print("Digite o Ano: ");
+                        int anoNovo = scanner.nextInt();
+                        scanner.nextLine(); // Limpa o buffer do teclado
+
+                        System.out.print("Tipo (CARRO/MOTO): ");
+                        String tipoNovo = scanner.nextLine().toUpperCase();
+
+                        // Agora criamos o objeto com os dados que VOCÊ digitou
+                        Veiculo v;
+                        if (tipoNovo.equals("CARRO")) {
+                            v = new Carro(placaNovo, modeloNovo, anoNovo);
+                        } else {
+                            v = new Moto(placaNovo, modeloNovo, anoNovo);
+                        }
+
+                        dao.salvar(v, tipoNovo); // Salva no banco com a nova coluna 'tipo'
+                        sincronizar(patioDinamico, dao);
+
+                        System.out.println("\n✅ Veículo " + v.getModelo() + " cadastrado com sucesso!");
+                    } catch (RuntimeException e) {
+                        System.out.println("⚠️ Erro ao cadastrar: " + e.getMessage());
+                    }
                     break;
 
                 case 2:
@@ -129,26 +145,41 @@ public class Main {
                     break;
 
                 case 7:
-                    System.out.println("\n--- Simulando Orçamento ---");
-                    // Exemplo: Usando o Nissan R32 que você cadastrou no case 1
-                    Veiculo r32 = new Carro("ABC-4321", "Nissan R32 GTS", 1998);
+                    System.out.println("\n--- 🔧 Gerando Orçamento Real ---");
+                    System.out.print("Digite a placa do veículo cadastrado: ");
+                    String placaBusca = scanner.nextLine();
 
-                    // Criando uma lista de peças para o serviço
-                    List<Peca> pecasParaServico = new java.util.ArrayList<>();
-                    pecasParaServico.add(new Peca("Filtro de Óleo", 50.0, 1));
-                    pecasParaServico.add(new Peca("Pastilha de Freio", 180.0, 1));
+                    Veiculo vEncontrado = dao.buscarPorPlaca(placaBusca);
 
-                    ServicoOficina oficina = new ServicoOficina();
-                    double valorFinal = oficina.calcularOrcamento(r32, pecasParaServico);
+                    if (vEncontrado != null) {
+                        List<Peca> pecasParaServico = new java.util.ArrayList<>();
+                        System.out.print("Quantas peças deseja adicionar do catálogo? ");
+                        int qtd = scanner.nextInt();
 
-                    System.out.println("Veículo: " + r32.getModelo());
-                    System.out.println("Valor da Revisão Base: R$ " + r32.calcularValorRevisao());
-                    System.out.println("Total com Peças: R$ " + valorFinal);
+                        for (int i = 0; i < qtd; i++) {
+                            System.out.print("Digite o ID da peça " + (i + 1) + ": ");
+                            int idBusca = scanner.nextInt();
+                            Peca p = new PecaDAO().buscarPorId(idBusca);
+                            if (p != null) {
+                                pecasParaServico.add(p);
+                                System.out.println("✅ " + p.getNome() + " adicionada.");
+                            } else {
+                                System.out.println("❌ Peça não encontrada.");
+                            }
+                        }
 
-                    System.out.println("\nPresione ENTER para voltar ao menu...");
+                        ServicoOficina oficinaService = new ServicoOficina();
+                        double valorFinal = oficinaService.calcularOrcamento(vEncontrado, pecasParaServico);
+
+                        System.out.println("\n--- RESUMO DO ORÇAMENTO ---");
+                        System.out.println("Veículo: " + vEncontrado.getModelo());
+                        System.out.println("Total: R$ " + valorFinal);
+                    } else {
+                        System.out.println("❌ Veículo não encontrado!");
+                    }
+                    System.out.println("\nPressione ENTER para continuar...");
                     scanner.nextLine();
                     break;
-
                 case 0:
                     System.out.println("Saindo... Até logo!");
                     break;

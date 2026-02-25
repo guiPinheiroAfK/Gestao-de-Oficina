@@ -80,6 +80,29 @@ public class VeiculoDAO {
         }
     }
 
+    public Veiculo buscarPorPlaca(String placa) {
+        String sql = "SELECT * FROM veiculos WHERE placa = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, placa);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String tipo = rs.getString("tipo");
+                    String modelo = rs.getString("modelo");
+                    int ano = rs.getInt("ano");
+                    if (tipo.equalsIgnoreCase("carro")) {
+                        return new Carro(placa, modelo, ano);
+                    } else {
+                        return new Moto(placa, modelo, ano);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar veículo: " + e.getMessage());
+        }
+        return null;
+    }
+
     // nosso querido UPTADE!!!
     // caso erre o nome, ano ou placa, não podendo alterar o tipo (ainda hehe, mas é simples de implementar)
     public void atualizar(Veiculo veiculo) {
