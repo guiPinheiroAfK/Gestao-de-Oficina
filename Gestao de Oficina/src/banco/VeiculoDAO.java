@@ -1,8 +1,7 @@
 package banco;
 
-import modelo.Veiculo;
-import modelo.Carro;
-import modelo.Moto;
+import modelo.*;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

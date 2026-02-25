@@ -34,6 +34,9 @@ public class Main {
             System.out.println("2 - Apagar Veículo por Placa");
             System.out.println("3 - Listar Veículos no Pátio");
             System.out.println("4 - Atualizar Veículos no Pátio");
+            System.out.println("5- Cadastrar peça");
+            System.out.println("6- Vizualizar peças cadastradas");
+            System.out.println("7- Simular orçamento");
             System.out.println("0 - Sair");
             System.out.print("Escolha: ");
 
@@ -108,7 +111,24 @@ public class Main {
                     }
                     break;
 
-                case 6:
+                case 6: // Ou o próximo número livre no seu menu
+                    System.out.println("\n--- 📦 Catálogo de Peças Cadastradas ---");
+                    List<Peca> listaPecas = new PecaDAO().buscarTodas(); // Chama o banco
+
+                    if (listaPecas.isEmpty()) {
+                        System.out.println("O catálogo está vazio. Cadastre algo primeiro!");
+                    } else {
+                        // Percorre a lista e imprime cada peça
+                        for (Peca p : listaPecas) {
+                            System.out.printf("ID: %d | Nome: %-15s | Preço: R$ %8.2f | Estoque: %d unidades%n",
+                                    p.getId(), p.getNome(), p.getValor(), p.getEstoque());
+                        }
+                    }
+                    System.out.println("\nPresione ENTER para voltar ao menu...");
+                    scanner.nextLine(); // Este cara "segura" a tela para você conseguir ler
+                    break;
+
+                case 7:
                     System.out.println("\n--- Simulando Orçamento ---");
                     // Exemplo: Usando o Nissan R32 que você cadastrou no case 1
                     Veiculo r32 = new Carro("ABC-4321", "Nissan R32 GTS", 1998);
@@ -124,6 +144,9 @@ public class Main {
                     System.out.println("Veículo: " + r32.getModelo());
                     System.out.println("Valor da Revisão Base: R$ " + r32.calcularValorRevisao());
                     System.out.println("Total com Peças: R$ " + valorFinal);
+
+                    System.out.println("\nPresione ENTER para voltar ao menu...");
+                    scanner.nextLine();
                     break;
 
                 case 0:
