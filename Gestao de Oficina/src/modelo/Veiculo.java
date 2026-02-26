@@ -4,11 +4,13 @@ public abstract class Veiculo {
     private String placa;
     private String modelo;
     private int ano;
+    private String tipo;
 
-    public Veiculo(String placa, String modelo, int ano){
+    public Veiculo(String placa, String modelo, int ano, String tipo){
         this.placa = placa;
         this.modelo = modelo;
         this.ano = ano;
+        this.tipo = tipo;
     }
 
     // polimorfismo
@@ -30,4 +32,8 @@ public abstract class Veiculo {
     }
     public void setAno() {}
 
+    public String getTipo(){
+        return tipo;
+    }
+    public void setTipo(){}
 }

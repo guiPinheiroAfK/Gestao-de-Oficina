@@ -49,9 +49,9 @@ public class VeiculoDAO {
 
                 // lógica para instanciar a classe correta
                 if (tipo.equalsIgnoreCase("carro")) {
-                    veiculosL.add(new Carro(placa, modelo, ano));
+                    veiculosL.add(new Carro(placa, modelo, ano, tipo));
                 } else
-                    veiculosL.add(new Moto(placa, modelo, ano));
+                    veiculosL.add(new Moto(placa, modelo, ano, tipo));
             }
 
         } catch (SQLException e) {
@@ -91,9 +91,9 @@ public class VeiculoDAO {
                     String modelo = rs.getString("modelo");
                     int ano = rs.getInt("ano");
                     if (tipo.equalsIgnoreCase("carro")) {
-                        return new Carro(placa, modelo, ano);
+                        return new Carro(placa, modelo, ano, tipo);
                     } else {
-                        return new Moto(placa, modelo, ano);
+                        return new Moto(placa, modelo, ano, tipo);
                     }
                 }
             }
