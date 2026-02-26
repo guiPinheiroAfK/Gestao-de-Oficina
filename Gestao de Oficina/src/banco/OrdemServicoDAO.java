@@ -2,7 +2,7 @@ package banco;
 
 
 
-import servico.OrdemServico;
+import modelo.OrdemServico;
 
 import modelo.Peca;
 
@@ -29,7 +29,7 @@ public class OrdemServicoDAO {
 
                 stmtOS.setString(1, os.getVeiculo().getPlaca());
 
-                stmtOS.setDouble(2, os.getValorTotal());
+                stmtOS.setDouble(2, os.calcularValorTotal());
 
                 stmtOS.setString(3, os.getStatus());
 
