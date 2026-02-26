@@ -30,13 +30,13 @@ public class Main {
         while (opcao != 0) {
             // menu bem basicao
             System.out.println("\n--- Oficina do Gui ---");
-            System.out.println("1 - Cadastrar Carro");
+            System.out.println("1 - Cadastrar Veículo");
             System.out.println("2 - Apagar Veículo por Placa");
             System.out.println("3 - Listar Veículos no Pátio");
             System.out.println("4 - Atualizar Veículos no Pátio");
-            System.out.println("5- Cadastrar peça");
-            System.out.println("6- Vizualizar peças cadastradas");
-            System.out.println("7- Simular orçamento");
+            System.out.println("5 - Cadastrar peça");
+            System.out.println("6 - Vizualizar peças cadastradas");
+            System.out.println("7 - Simular orçamento");
             System.out.println("0 - Sair");
             System.out.print("Escolha: ");
 
@@ -60,15 +60,20 @@ public class Main {
                         System.out.print("Tipo (CARRO/MOTO): ");
                         String tipoNovo = scanner.nextLine().toUpperCase();
 
-                        // Agora criamos o objeto com os dados que VOCÊ digitou
-                        Veiculo v;
+
+                        Veiculo v = null;
+
                         if (tipoNovo.equals("CARRO")) {
                             v = new Carro(placaNovo, modeloNovo, anoNovo);
-                        } else {
+                        } else if (tipoNovo.equals("MOTO")){
                             v = new Moto(placaNovo, modeloNovo, anoNovo);
+                        } else {
+                            System.out.println("❌ Tipo inválido! Use CARRO ou MOTO.");
+                            break; // Sai do case se o tipo estiver errado
                         }
 
-                        dao.salvar(v, tipoNovo); // Salva no banco com a nova coluna 'tipo'
+                        // Agora o 'v' é um objeto de verdade, o DAO vai aceitar
+                        dao.salvar(v, tipoNovo);
                         sincronizar(patioDinamico, dao);
 
                         System.out.println("\n✅ Veículo " + v.getModelo() + " cadastrado com sucesso!");
@@ -76,7 +81,6 @@ public class Main {
                         System.out.println("⚠️ Erro ao cadastrar: " + e.getMessage());
                     }
                     break;
-
                 case 2:
                     System.out.print("Digite a placa para apagar: ");
                     String placa = scanner.nextLine();
@@ -195,6 +199,51 @@ public class Main {
                     // ele não aceita letras, ent tem q arrumar isso tb
             }
         }
-        scanner.close();
+        // scanner.close();
     }
+
+    public void innerMenuServices(Scanner scanner, int tipo){
+        switch (tipo){
+            case 1:
+                System.out.println("1 Troca de Óleo e Filtros:\n" +
+                                "2 Revisão de Freios:\n" +
+                                "3 Sistema de Arrefecimento:\n" +
+                                "4 Verificação de Velas e Correias:\n" +
+                                "5 Alinhamento e Balanceamento:\n" +
+                                "6 Verificação da Bateria:\n");
+                                scanner.nextInt();
+
+                break;
+            case 2:
+                System.out.println("1 Reparo de Motor:\n" +
+                                "2 Serviços de Suspensão: Troca de amortecedores, molas, buchas e bandejas.\n" +
+                                "3 Sistema de Direção: Reparo em direção hidráulica ou elétrica.\n" +
+                                "4 Transmissão e Embreagem: Troca de kit de embreagem ou manutenção do câmbio automático.\n" +
+                                "5 Reparo no Sistema de Escapamento:");
+                                scanner.nextInt();
+                break;
+            case 3:
+                System.out.println("1 Diagnóstico Computadorizado:\n" +
+                                "2 Sistema de Iluminação:\n" +
+                                "3 Motor de Arranque e Alternador:\n" +
+                                "4 Vidros e Travas Elétricas:");
+                                scanner.nextInt();
+                break;
+            case 4:
+                System.out.println("1 Lavagem Detalhada e Higienização:\n" +
+                                "2 Funilaria e Pintura:\n" +
+                                "3 Polimento e Cristalização/Vitrificação:\n" +
+                                "4 Martelinho de Ouro:");
+                                scanner.nextInt();
+                break;
+            case 5:
+                System.out.println("1 Troca de Pneus:\n" +
+                                "2 Reparo de Pneus:");
+                                scanner.nextInt();
+                break;
+            default:
+                System.out.println("Não tinha essa opção...");
+        }
+    }
+
 }
