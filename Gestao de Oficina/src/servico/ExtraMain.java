@@ -10,29 +10,14 @@ import java.util.concurrent.TimeUnit;
 // "ai q nome feio"... faltou criatividade :c
 public class ExtraMain {
 
-    // sincronizar, ja tava na main antes >:c
-    public static void sincronizar(List<Veiculo> veiculos, VeiculoDAO dao) {
+    // atualizarListaLocal, ja tava na main antes >:c
+    public static void atualizarListaLocal(List<Veiculo> veiculos, VeiculoDAO dao) {
         veiculos.clear();
         veiculos.addAll(dao.buscarTodos());
     }
 
-    // preciso dizer algo?
-    public static void main(String[] args) throws InterruptedException {
-        Scanner scanner = new Scanner(System.in);
-        VeiculoDAO dao = new VeiculoDAO();
-
-
-        // joga tudo para uma lista antes de rodar o menu
-        List<Veiculo> patioDinamico = dao.buscarTodos();
-        System.out.println("✅ " + patioDinamico.size() + " veículos carregados do banco!");
-        // faz o mesmo que o "sleep() " em C
-        TimeUnit.SECONDS.sleep(2);
-
-        menuPrincipal(scanner, patioDinamico, dao);
-    }
-
     // op. 1
-    public static void func1(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao){
+    public static void cadastrarVeiculo(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao){
         try {
             System.out.println("\n--- Cadastro de Veículo ---");
             System.out.print("Digite a Placa: ");
@@ -58,7 +43,7 @@ public class ExtraMain {
                 System.out.println("❌ Tipo inválido! Use CARRO ou MOTO.");
 
             dao.salvar(v, tipoNovo);
-            sincronizar(patioDinamico, dao);
+            atualizarListaLocal(patioDinamico, dao);
 
             System.out.println("\n✅ Veículo " + v.getModelo() + " cadastrado com sucesso!");
         } catch (RuntimeException e) {
@@ -67,15 +52,15 @@ public class ExtraMain {
     }
 
     // op. 2
-    public static void func2(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao){
+    public static void removerVeiculoPorPlaca(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao){
         System.out.print("Digite a placa para apagar: ");
         String placa = scanner.nextLine();
         dao.deletar(placa);
-        sincronizar(patioDinamico, dao); // <- recarrega a lista
+        atualizarListaLocal(patioDinamico, dao); // <- recarrega a lista
     }
 
     // op. 3
-    public static void func3(VeiculoDAO dao) throws InterruptedException {
+    public static void listarVeiculosNoPatio(VeiculoDAO dao) throws InterruptedException {
         System.out.println("\n--- Lista de Veículos no Pátio ---");
         List<Veiculo> lista = dao.buscarTodos();
         if (lista.isEmpty()) {
@@ -91,16 +76,16 @@ public class ExtraMain {
     }
 
     // op. 4
-    public static void func4(VeiculoDAO dao, List<Veiculo> patioDinamico){
+    public static void atualizarDadosVeiculo(VeiculoDAO dao, List<Veiculo> patioDinamico){
         // ex: mudar o 370z para um 370z NISMO (18 cv a mais)
         System.out.println("\n--- Atualizando Veículo ---");
         Carro atualizado = new Carro("ABC-1234", "Nissan 370z NISMO", 2025, "Carro");
         dao.atualizar(atualizado);
-        sincronizar(patioDinamico, dao); // <- <- recarrega a lista
+        atualizarListaLocal(patioDinamico, dao); // <- <- recarrega a lista
     }
 
     // op. 5
-    public static void func5(Scanner scanner){
+    public static void cadastrarPecaNoCatalogo(Scanner scanner){
         System.out.println("\n--- Cadastro de Peça no Catálogo ---");
         System.out.print("Nome da peça: ");
         String nomePeca = scanner.nextLine();
@@ -121,7 +106,7 @@ public class ExtraMain {
     }
 
     // op. 6
-    public static void func6(Scanner scanner){
+    public static void exibirCatalogoDePecas(Scanner scanner){
         System.out.println("\n--- Catálogo de Peças Cadastradas ---");
         List<Peca> listaPecas = new PecaDAO().buscarTodas(); // Chama o banco
 
@@ -139,7 +124,7 @@ public class ExtraMain {
     }
 
     // op. 7
-    public static void func7(Scanner scanner, VeiculoDAO dao){
+    public static void iniciarFluxoOrcamento(Scanner scanner, VeiculoDAO dao){
         System.out.println("\n--- Gerando Orçamento Real ---");
         System.out.print("Digite a placa do veículo cadastrado: ");
         String placaBusca = scanner.nextLine();
@@ -154,11 +139,11 @@ public class ExtraMain {
         System.out.println(vEncontrado.getTipo());
         if ("CARRO".equalsIgnoreCase(vEncontrado.getTipo())){
             System.out.println("vc definitivamente tem um carro!");
-            menuFunc7(scanner);
+            menuIniciarFluxoOrcamento(scanner);
         } else{
 
             System.out.println("vc definitivamente tem uma moto!");
-            menuFunc7(scanner);
+            menuIniciarFluxoOrcamento(scanner);
         }
 
 
@@ -172,17 +157,17 @@ public class ExtraMain {
         }
 
     // menu op. 7
-    public static void menuFunc7 (Scanner scanner){
+    public static void menuIniciarFluxoOrcamento(Scanner scanner){
         List<Peca> pecasParaServico = new java.util.ArrayList<>();
         System.out.println("\n===TIPO DE SERVIÇOS===");
-        System.out.println("1. Manutenção Preventiva (Revisão Periódica)");
-        System.out.println("2. Manutenção Corretiva (Reparos)");
-        System.out.println("3- Diagnóstico e Injeção Eletrônica");
-        System.out.println("4. Serviços de Estética, Limpeza e Funilaria");
-        System.out.println("5. Serviços de Pneus e Rodas");
+        System.out.println("1. "+ TipoServico.PREVENTIVA.getDescricao());
+        System.out.println("2. "+ TipoServico.CORRETIVA.getDescricao());
+        System.out.println("3- "+ TipoServico.ELETRICA.getDescricao());
+        System.out.println("4. "+ TipoServico.ESTETICA.getDescricao());
+        System.out.println("5. "+ TipoServico.PNEUS.getDescricao());
         System.out.println("Escolha uma opção: ");
         int tipo = scanner.nextInt();
-            innerMenuServices(scanner, tipo);
+            ServicoOrcamento.exibirMenuServicos(scanner, tipo);
     }
 
     // menu principal
@@ -207,31 +192,31 @@ public class ExtraMain {
             switch (opcao) {
                 case 1:
                     System.out.println("oi rs");
-                    func1(scanner, patioDinamico, dao);
+                    cadastrarVeiculo(scanner, patioDinamico, dao);
                     break;
 
                 case 2:
-                    func2(scanner, patioDinamico, dao);
+                    removerVeiculoPorPlaca(scanner, patioDinamico, dao);
                     break;
 
                 case 3:
-                    func3(dao);
+                    listarVeiculosNoPatio(dao);
                     break;
 
                 case 4:
-                    func4(dao, patioDinamico);
+                    atualizarDadosVeiculo(dao, patioDinamico);
                     break;
 
                 case 5:
-                    func5(scanner);
+                    cadastrarPecaNoCatalogo(scanner);
                     break;
 
-                case 6: // Ou o próximo número livre no seu menu
-                    func6(scanner);
+                case 6:
+                    exibirCatalogoDePecas(scanner);
                     break;
 
                 case 7:
-                    func7(scanner, dao);
+                    iniciarFluxoOrcamento(scanner, dao);
                     break;
                 case 0:
                     System.out.println("Saindo... Até logo!");
@@ -246,182 +231,5 @@ public class ExtraMain {
         // scanner.close();
     }
 
-    // menu dentro do orçamento
-    public static void innerMenuServices(Scanner scanner, int tipo){
-    switch (tipo){
-            case 1:
-                System.out.println("1- Troca de Óleo e Filtros:");
-                System.out.println("2- Revisão de Freios:");
-                System.out.println("3- Sistema de Arrefecimento:");
-                System.out.println("4- Verificação de Velas e Correias:");
-                System.out.println("5- Alinhamento e Balanceamento:");
-                System.out.println("6- Verificação da Bateria:");
-                scanner.nextInt();
-                    minMenu1(scanner, tipo);
-                break;
-            case 2:
-                System.out.println("1- Reparo de Motor:");
-                System.out.println("2- Serviços de Suspensão: Troca de amortecedores, molas, buchas e bandejas.");
-                System.out.println("3- Sistema de Direção: Reparo em direção hidráulica ou elétrica.");
-                System.out.println("4- Transmissão e Embreagem: Troca de kit de embreagem ou manutenção do câmbio automático.");
-                System.out.println("5- Reparo no Sistema de Escapamento:");
-                scanner.nextInt();
-                    minMenu2(scanner, tipo);
-                break;
-            case 3:
-                System.out.println("1- Diagnóstico Computadorizado:");
-                System.out.println("2- Sistema de Iluminação:");
-                System.out.println("3- Motor de Arranque e Alternador:");
-                System.out.println("4- Vidros e Travas Elétricas:");
-                scanner.nextInt();
-                    minMenu3(scanner, tipo);
-                break;
-            case 4:
-                System.out.println("1- Lavagem Detalhada e Higienização:");
-                System.out.println("2- Funilaria e Pintura:");
-                System.out.println("3- Polimento e Cristalização/Vitrificação:");
-                System.out.println("4- Martelinho de Ouro:");
-                scanner.nextInt();
-                    minMenu4(scanner, tipo);
-                break;
-            case 5:
-                System.out.println("1- Troca de Pneus:");
-                System.out.println("2- Reparo de Pneus:");
-                scanner.nextInt();
-                    minMenu5(scanner, tipo);
-                break;
-            default:
-                System.out.println("Não tinha essa opção...");
-        }
-    }
 
-    // menus base para orçamento
-    public static void minMenu1(Scanner scanner, int tipo){
-        while (tipo != 0){
-            switch(tipo){
-                case 1:
-                    System.out.println("1- Troca de Óleo e Filtros");
-                    scanner.nextInt(tipo);
-                    break;
-                case 2:
-                    System.out.println("2- Revisão de Freios");
-                    scanner.nextInt(tipo);
-                    break;
-                case 3:
-                    System.out.println("3- Sistema de Arrefecimento");
-                    scanner.nextInt(tipo);
-                    break;
-                case 4:
-                    System.out.println("4- Verificação de Velas e Correias");
-                    scanner.nextInt(tipo);
-                    break;
-                case 5:
-                    System.out.println("5- Alinhamento e Balanceamento");
-                    scanner.nextInt(tipo);
-                    break;
-                case 6:
-                    System.out.println("6- Verificação da Bateria");
-                    scanner.nextInt(tipo);
-                    break;
-                default:
-                    System.out.println("Quer ser especial é?");
-            }
-        }
-    }
-
-    public static void minMenu2(Scanner scanner, int tipo){
-        while (tipo != 0) {
-            switch (tipo) {
-                case 1:
-                    System.out.println("1- Reparo de Motor");
-                    scanner.nextInt(tipo);
-                    break;
-                case 2:
-                    System.out.println("2- Serviços de Suspensão: Troca de amortecedores, molas, buchas e bandejas");
-                    scanner.nextInt(tipo);
-                    break;
-                case 3:
-                    System.out.println("3- Sistema de Direção: Reparo em direção hidráulica ou elétrica");
-                    scanner.nextInt(tipo);
-                    break;
-                case 4:
-                    System.out.println("4- Transmissão e Embreagem: Troca de kit de embreagem ou manutenção do câmbio automático");
-                    scanner.nextInt(tipo);
-                    break;
-                case 5:
-                    System.out.println("5- Reparo no Sistema de Escapamento");
-                    scanner.nextInt(tipo);
-                    break;
-                default:
-                    System.out.println("Quer ser especial é?");
-            }
-        }
-    }
-
-    public static void minMenu3(Scanner scanner, int tipo){
-        while (tipo != 0) {
-            switch (tipo) {
-                case 1:
-                    System.out.println("1- Diagnóstico Computadorizado");
-                    scanner.nextInt(tipo);
-                    break;
-                case 2:
-                    System.out.println("2- Sistema de Iluminação");
-                    scanner.nextInt(tipo);
-                    break;
-                case 3:
-                    System.out.println("3- Motor de Arranque e Alternador");
-                    scanner.nextInt(tipo);
-                    break;
-                case 4:
-                    System.out.println("4- Vidros e Travas Elétricas");
-                    scanner.nextInt(tipo);
-                    break;
-                default:
-                    System.out.println("Quer ser especial é?");
-                }
-        }
-    }
-
-    public static void minMenu4(Scanner scanner, int tipo){
-        while (tipo != 0) {
-            switch (tipo) {
-                case 1:
-                    System.out.println("1- Lavagem Detalhada e Higienização");
-                    scanner.nextInt(tipo);
-                    break;
-                case 2:
-                    System.out.println("2- Funilaria e Pintura");
-                    scanner.nextInt(tipo);
-                    break;
-                case 3:
-                    System.out.println("3- Polimento e Cristalização/Vitrificação");
-                    scanner.nextInt(tipo);
-                    break;
-                case 4:
-                    System.out.println("4- Martelinho de Ouro");
-                    scanner.nextInt(tipo);
-                    break;
-                default:
-                    System.out.println("Quer ser especial é?");
-                }
-        }
-    }
-
-    public static void minMenu5(Scanner scanner, int tipo){
-        while (tipo != 0) {
-            switch (tipo) {
-                case 1:
-                    System.out.println("1- Troca de Pneus");
-                    scanner.nextInt(tipo);
-                    break;
-                case 2:
-                    System.out.println("2- Reparo de Pneus");
-                    scanner.nextInt(tipo);
-                    break;
-                default:
-                    System.out.println("Quer ser especial é?");
-            }
-        }
-    }
 }
