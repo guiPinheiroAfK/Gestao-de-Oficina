@@ -60,15 +60,49 @@ public class ExtraMain {
     }
 
     // op. 3
-    public static void listarVeiculosNoPatio(VeiculoDAO dao) throws InterruptedException {
-        System.out.println("\n--- Lista de Veículos no Pátio ---");
-        List<Veiculo> lista = dao.buscarTodos();
-        if (lista.isEmpty()) {
-            System.out.println("O pátio está vazio!");
-        } else {
-            for (Veiculo v : lista) {
-                System.out.println("Modelo: " + v.getModelo() + " | Placa: " + v.getPlaca() + " | Ano: " + v.getAno());
-            } TimeUnit.SECONDS.sleep(2);
+    public static void listarVeiculosNoPatio(Scanner scanner, VeiculoDAO dao) throws InterruptedException {
+        int opcao = -1;
+
+        while (opcao != 0) {
+            System.out.println("\n------------------------------");
+            System.out.println("1 - Listar Todos");
+            System.out.println("2 - Listar por Ano");
+            System.out.println("3 - Listar por Modelo");
+            System.out.println("4 - Listar por Tipo");
+            System.out.println("0 - Voltar ao Menu Principal");
+            System.out.println("------------------------------");
+            System.out.println("Escolha uma opção: ");
+
+            opcao = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (opcao){
+                case 1:
+                    List<Veiculo> lista = dao.buscarTodos();
+                    if (lista.isEmpty()) {
+                        System.out.println("O pátio está vazio!");
+                    } else {
+                        for (Veiculo v : lista) {
+                            System.out.println("Modelo: " + v.getModelo() + " | Placa: " + v.getPlaca() + " | Ano: " + v.getAno());
+                        }
+                        TimeUnit.SECONDS.sleep(2);
+                    }
+                    break;
+
+                case 2:
+                    break;
+
+                case 3:
+                    break;
+
+                case 0:
+                    break;
+
+                default:
+                    System.out.println("Opção inválida! >:c");
+
+            }
+
         }
 
         // todos os salvar/buscar/deletar estao no "banco.VeiculoDAO"
@@ -200,7 +234,7 @@ public class ExtraMain {
                     break;
 
                 case 3:
-                    listarVeiculosNoPatio(dao);
+                    listarVeiculosNoPatio(scanner, dao);
                     break;
 
                 case 4:
