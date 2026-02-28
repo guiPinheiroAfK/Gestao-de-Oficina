@@ -16,6 +16,18 @@ public class ExtraMain {
         veiculos.addAll(dao.buscarTodos());
     }
 
+    // evita que tenhamos que repetir loops de impressão em cada 'case' do menu.
+    private static void exibirLista(List<Veiculo> lista) throws InterruptedException {
+        if (lista.isEmpty()) {
+            System.out.println("Nada encontrado! :c");
+        } else {
+            for (Veiculo v : lista) {
+                System.out.println("Modelo: " + v.getModelo() + " | Placa: " + v.getPlaca() + " | Ano: " + v.getAno());
+            }
+            TimeUnit.SECONDS.sleep(2);
+        }
+    }
+
     // op. 1
     public static void cadastrarVeiculo(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao){
         try {
@@ -61,14 +73,45 @@ public class ExtraMain {
 
     // op. 3
     public static void listarVeiculosNoPatio(Scanner scanner, VeiculoDAO dao) throws InterruptedException {
+        int escopo = -1;
+        String filtroTipo = null;
+
+        // para validar a escolha inicial (CARRO/MOTO/AMBOS)
+        while (escopo < 1 || escopo > 3) {
+            System.out.println("\n--- O que deseja visualizar? ---");
+            System.out.println("1 - Apenas CARROS");
+            System.out.println("2 - Apenas MOTOS");
+            System.out.println("3 - AMBOS (Ver pátio completo)");
+            System.out.print("Escolha uma opção: ");
+
+            // verifica se o que foi digitado é um número para evitar erro de letra
+            if (scanner.hasNextInt()) {
+                escopo = scanner.nextInt();
+                scanner.nextLine();
+
+                if (escopo == 1) {
+                    filtroTipo = "CARRO";
+                } else if (escopo == 2) {
+                    filtroTipo = "MOTO";
+                } else if (escopo == 3) {
+                    filtroTipo = null; // AMBOS
+                } else {
+                    System.out.println(" Opção inválida! Escolha 1, 2 ou 3. >:c");
+                }
+            } else {
+                System.out.println(" Erro: Digite apenas números! >:c");
+                scanner.nextLine(); // Limpa o buffer do erro
+            }
+        }
+
         int opcao = -1;
 
         while (opcao != 0) {
             System.out.println("\n------------------------------");
+            System.out.println("Listando: " + (filtroTipo == null ? "TODOS" : filtroTipo + "S"));
             System.out.println("1 - Listar Todos");
             System.out.println("2 - Listar por Ano");
             System.out.println("3 - Listar por Modelo");
-            System.out.println("4 - Listar por Tipo");
             System.out.println("0 - Voltar ao Menu Principal");
             System.out.println("------------------------------");
             System.out.println("Escolha uma opção: ");
@@ -78,24 +121,37 @@ public class ExtraMain {
 
             switch (opcao){
                 case 1:
-                    List<Veiculo> lista = dao.buscarTodos();
-                    if (lista.isEmpty()) {
-                        System.out.println("O pátio está vazio!");
-                    } else {
-                        for (Veiculo v : lista) {
-                            System.out.println("Modelo: " + v.getModelo() + " | Placa: " + v.getPlaca() + " | Ano: " + v.getAno());
-                        }
-                        TimeUnit.SECONDS.sleep(2);
-                    }
+                    exibirLista( (filtroTipo == null) ? dao.buscarTodos() : dao.buscarPorTipo(filtroTipo) );
                     break;
 
                 case 2:
+                    System.out.println("\n--- Filtrar por Ano ---");
+                    System.out.println("1 - Ver todos em ordem crescente");
+                    System.out.println("2 - Buscar um ano específico");
+                    System.out.print("Escolha uma opção: ");
+                    int subOpcaoAno = scanner.nextInt();
+                    scanner.nextLine();
+
+                    if (subOpcaoAno == 1) {
+                        exibirLista(dao.buscarOrdenadoPorAno(filtroTipo));
+                    } else if (subOpcaoAno == 2) {
+                        System.out.print("Digite o ano desejado: ");
+                        int anoBusca = scanner.nextInt();
+                        scanner.nextLine();
+                        exibirLista(dao.buscarPorAnoETipo(anoBusca, filtroTipo));
+                    } else {
+                        System.out.println("Opção inválida!");
+                    }
                     break;
 
                 case 3:
+                    System.out.print("Digite o modelo: ");
+                    String modelo = scanner.nextLine();
+                    exibirLista( dao.buscarPorModeloETipo(modelo, filtroTipo));
                     break;
 
                 case 0:
+                    System.out.println("Voltando...");
                     break;
 
                 default:

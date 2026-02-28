@@ -8,22 +8,15 @@ import modelo.Peca;
 
 import java.sql.*;
 
-
 public class OrdemServicoDAO {
-
-
 
     public void salvar(OrdemServico os) {
 
         String sqlOS = "INSERT INTO ordens_servico (veiculo_placa, valor_total, status) VALUES (?, ?, ?) RETURNING id";
 
-
-
         try (Connection conn = ConnectionFactory.getConnection()) {
 
             conn.setAutoCommit(false); // Inicia transação
-
-
 
             try (PreparedStatement stmtOS = conn.prepareStatement(sqlOS)) {
 
@@ -33,8 +26,6 @@ public class OrdemServicoDAO {
 
                 stmtOS.setString(3, os.getStatus());
 
-
-
                 ResultSet rs = stmtOS.executeQuery();
 
                 if (rs.next()) {
@@ -43,10 +34,7 @@ public class OrdemServicoDAO {
 
                 }
 
-
-
-// Salva as peças vinculadas na tabela intermediária
-
+                // Salva as peças vinculadas na tabela intermediária
                 String sqlItens = "INSERT INTO itens_os (os_id, peca_id) VALUES (?, ?)";
 
                 try (PreparedStatement stmtItens = conn.prepareStatement(sqlItens)) {
@@ -60,17 +48,13 @@ public class OrdemServicoDAO {
                         stmtItens.addBatch();
 
                     }
-
                     stmtItens.executeBatch();
 
                 }
 
-
-
                 conn.commit(); // Finaliza com sucesso
 
             } catch (SQLException e) {
-
                 conn.rollback(); // Desfaz tudo se der erro
 
                 throw new RuntimeException("Erro ao salvar OS: " + e.getMessage());
