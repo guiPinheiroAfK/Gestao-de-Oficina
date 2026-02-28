@@ -1,30 +1,47 @@
 package modelo;
 
 public enum TipoServico {
+    // preventiva
+        OleoFiltro("Troca de Óleo e Filtros: ", 350.00),
+        RevFreio("Revisão de Freios:", 500.00),
+        Arrefecimento("Sistema de Arrefecimento:", 150.00),
+        VelasCorreia("Verificação de Velas e Correias:", 1250.00 ),
+        AlinhaBalanca("Alinhamento e Balanceamento:", 250.00),
+        Bateria("Verificação da Bateria:", 400.00),
 
-    // O querido "Enum"
-    // foi utilizado para padronizar as categorias
-    // de serviços e centralizar os valores de mão de obra
-    // (facilitou mt, é só olhar nos últimos commits antes desse).
+    // corretiva
+        ReparoMotor("Reparo de Motor", 6500.00),
+        Suspensao("Troca de amortecedores, molas, buchas e bandejas", 2000.00),
+        Direcao("Reparo em direção hidráulica ou elétrica.", 950.00),
+        TransmissaoEmbreagem("Troca de kit de embreagem ou manutenção do câmbio automático", 1700.00),
+        Escapamento("Reparo no Sistema de Escapamento", 650.00 ),
+    // elétrica
+        Diagnostico("Diagnóstico Computadorizado ", 110.00),
+        Iluminacao("Sistema de Iluminação", 350.00),
+        MotorArranque("Motor de Arranque e Alternador",  600.00),
+        VidrosTravas("Vidros e Travas Elétricas", 750.00),
+    // estética
+        Lavagem("Lavagem Detalhada e Higienização", 300.00),
+        Funilaria("Funilaria e Pintura", 3000.00),
+        Polimento("Polimento e Cristalização/Vitrificação", 1500.00),
+        MartelinhoOuro("Martelinho de Ouro", 400.00),
+    // pneus
+        TrocaPneus("Troca de Pneu", 1500.00),
+        Remendo("Reparo de Pneus", 60.00);
 
-    PREVENTIVA("Manutenção Preventiva", 100.0),
-    CORRETIVA("Manutenção Corretiva", 150.0),
-    ELETRICA("Diagnóstico e Elétrica", 200.0),
-    ESTETICA("Estética e Limpeza", 80.0),
-    PNEUS("Serviços de Pneus", 50.0);
+        private final String descricao;
+        private final double preco;
 
-    private final String descricao;
-    private final double valorMaoDeObra;
-
-    TipoServico(String descricao, double valorMaoDeObra) {
-        this.descricao = descricao;
-        this.valorMaoDeObra = valorMaoDeObra;
-    }
+        TipoServico(String descricao, double preco){
+            this.descricao = descricao;
+            this.preco = preco;
+        }
 
     public String getDescricao() {
         return descricao;
     }
-    public double getValorMaoDeObra() {
-        return valorMaoDeObra;
+    public double getPrecoServico() {
+        return preco;
     }
+
 }

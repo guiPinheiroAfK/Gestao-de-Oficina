@@ -231,7 +231,6 @@ public class ExtraMain {
             System.out.println("vc definitivamente tem um carro!");
             menuIniciarFluxoOrcamento(scanner);
         } else{
-
             System.out.println("vc definitivamente tem uma moto!");
             menuIniciarFluxoOrcamento(scanner);
         }
@@ -250,11 +249,11 @@ public class ExtraMain {
     public static void menuIniciarFluxoOrcamento(Scanner scanner){
         List<Peca> pecasParaServico = new java.util.ArrayList<>();
         System.out.println("\n===TIPO DE SERVIÇOS===");
-        System.out.println("1. "+ TipoServico.PREVENTIVA.getDescricao());
-        System.out.println("2. "+ TipoServico.CORRETIVA.getDescricao());
-        System.out.println("3- "+ TipoServico.ELETRICA.getDescricao());
-        System.out.println("4. "+ TipoServico.ESTETICA.getDescricao());
-        System.out.println("5. "+ TipoServico.PNEUS.getDescricao());
+        System.out.println("1. "+ ServicosGerais.PREVENTIVA.getDescricao());
+        System.out.println("2. "+ ServicosGerais.CORRETIVA.getDescricao());
+        System.out.println("3- "+ ServicosGerais.ELETRICA.getDescricao());
+        System.out.println("4. "+ ServicosGerais.ESTETICA.getDescricao());
+        System.out.println("5. "+ ServicosGerais.PNEUS.getDescricao());
         System.out.println("Escolha uma opção: ");
         int tipo = scanner.nextInt();
             ServicoOrcamento.exibirMenuServicos(scanner, tipo);

@@ -1,5 +1,7 @@
 package servico;
 
+import modelo.TipoServico;
+
 import java.util.Scanner;
 
 public class ServicoOrcamento {
@@ -7,44 +9,18 @@ public class ServicoOrcamento {
     public static void exibirMenuServicos(Scanner scanner, int tipo){
         switch (tipo){
             case 1:
-                System.out.println("1- Troca de Óleo e Filtros:");
-                System.out.println("2- Revisão de Freios:");
-                System.out.println("3- Sistema de Arrefecimento:");
-                System.out.println("4- Verificação de Velas e Correias:");
-                System.out.println("5- Alinhamento e Balanceamento:");
-                System.out.println("6- Verificação da Bateria:");
-                scanner.nextInt();
                 submenuPreventiva(scanner);
                 break;
             case 2:
-                System.out.println("1- Reparo de Motor:");
-                System.out.println("2- Serviços de Suspensão: Troca de amortecedores, molas, buchas e bandejas.");
-                System.out.println("3- Sistema de Direção: Reparo em direção hidráulica ou elétrica.");
-                System.out.println("4- Transmissão e Embreagem: Troca de kit de embreagem ou manutenção do câmbio automático.");
-                System.out.println("5- Reparo no Sistema de Escapamento:");
-                scanner.nextInt();
                 submenuCorretiva(scanner);
                 break;
             case 3:
-                System.out.println("1- Diagnóstico Computadorizado:");
-                System.out.println("2- Sistema de Iluminação:");
-                System.out.println("3- Motor de Arranque e Alternador:");
-                System.out.println("4- Vidros e Travas Elétricas:");
-                scanner.nextInt();
                 submenuEletrica(scanner);
                 break;
             case 4:
-                System.out.println("1- Lavagem Detalhada e Higienização:");
-                System.out.println("2- Funilaria e Pintura:");
-                System.out.println("3- Polimento e Cristalização/Vitrificação:");
-                System.out.println("4- Martelinho de Ouro:");
-                scanner.nextInt();
                 submenuEstetica(scanner);
                 break;
             case 5:
-                System.out.println("1- Troca de Pneus:");
-                System.out.println("2- Reparo de Pneus:");
-                scanner.nextInt();
                 submenuPneus(scanner);
                 break;
             default:
@@ -56,13 +32,13 @@ public class ServicoOrcamento {
     public static void submenuPreventiva(Scanner scanner) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
-            System.out.println("\n--- Manutenção Preventiva ---");
-            System.out.println("1- Troca de Óleo e Filtros");
-            System.out.println("2- Revisão de Freios");
-            System.out.println("3- Sistema de Arrefecimento");
-            System.out.println("4- Verificação de Velas e Correias");
-            System.out.println("5- Alinhamento e Balanceamento");
-            System.out.println("6- Verificação da Bateria");
+            System.out.println("Preventiva");
+            System.out.println("1- " + TipoServico.OleoFiltro.getDescricao());
+            System.out.println("2- " + TipoServico.RevFreio.getDescricao());
+            System.out.println("3- " + TipoServico.Arrefecimento.getDescricao());
+            System.out.println("4- " + TipoServico.VelasCorreia.getDescricao());
+            System.out.println("5- " + TipoServico.AlinhaBalanca.getDescricao());
+            System.out.println("6- " + TipoServico.Bateria.getDescricao());
             System.out.println("0- Voltar");
             System.out.print("Escolha uma sub-opção: ");
 
@@ -85,12 +61,12 @@ public class ServicoOrcamento {
     public static void submenuCorretiva(Scanner scanner) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
-            System.out.println("\n--- Manutenção Corretiva ---");
-            System.out.println("1- Reparo de Motor");
-            System.out.println("2- Serviços de Suspensão");
-            System.out.println("3- Sistema de Direção");
-            System.out.println("4- Transmissão e Embreagem");
-            System.out.println("5- Reparo no Sistema de Escapamento");
+            System.out.println("Corretiva");
+            System.out.println("1- " + TipoServico.ReparoMotor.getDescricao());
+            System.out.println("2- " + TipoServico.Suspensao.getDescricao());
+            System.out.println("3- " + TipoServico.Direcao.getDescricao());
+            System.out.println("4- " + TipoServico.TransmissaoEmbreagem.getDescricao());
+            System.out.println("5- " + TipoServico.Escapamento.getDescricao());
             System.out.println("0- Voltar");
             System.out.print("Escolha: ");
 
@@ -112,11 +88,11 @@ public class ServicoOrcamento {
     public static void submenuEletrica(Scanner scanner) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
-            System.out.println("\n--- Diagnóstico e Elétrica ---");
-            System.out.println("1- Diagnóstico Computadorizado");
-            System.out.println("2- Sistema de Iluminação");
-            System.out.println("3- Motor de Arranque e Alternador");
-            System.out.println("4- Vidros e Travas Elétricas");
+            System.out.println("Elétrica");
+            System.out.println("1- " + TipoServico.Diagnostico.getDescricao());
+            System.out.println("2- " + TipoServico.Iluminacao.getDescricao());
+            System.out.println("3- " + TipoServico.MotorArranque.getDescricao());
+            System.out.println("4- " + TipoServico.VidrosTravas.getDescricao());
             System.out.println("0- Voltar");
             System.out.print("Escolha: ");
 
@@ -137,11 +113,11 @@ public class ServicoOrcamento {
     public static void submenuEstetica(Scanner scanner) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
-            System.out.println("\n--- Estética e Limpeza ---");
-            System.out.println("1- Lavagem Detalhada e Higienização");
-            System.out.println("2- Funilaria e Pintura");
-            System.out.println("3- Polimento e Cristalização");
-            System.out.println("4- Martelinho de Ouro");
+            System.out.println("Estética");
+            System.out.println("1- " + TipoServico.Lavagem.getDescricao());
+            System.out.println("2- " + TipoServico.Funilaria.getDescricao());
+            System.out.println("3- " + TipoServico.Polimento.getDescricao());
+            System.out.println("4- " + TipoServico.MartelinhoOuro.getDescricao());
             System.out.println("0- Voltar");
             System.out.print("Escolha: ");
 
@@ -163,8 +139,8 @@ public class ServicoOrcamento {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
             System.out.println("\n--- Pneus e Rodas ---");
-            System.out.println("1- Troca de Pneus");
-            System.out.println("2- Reparo de Pneus");
+            System.out.println("1- " + TipoServico.TrocaPneus.getDescricao());
+            System.out.println("2- " + TipoServico.Remendo.getDescricao());
             System.out.println("0- Voltar");
             System.out.print("Escolha: ");
 

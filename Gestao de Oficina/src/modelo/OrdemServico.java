@@ -6,12 +6,12 @@ import java.util.ArrayList;
 public class OrdemServico implements Servico {
     private int id; // Veio da classe de servico
     private Veiculo veiculo;
-    private TipoServico tipo;
+    private ServicosGerais tipo;
     private List<Peca> pecas = new ArrayList<>();
     private String status = "ABERTA"; // Veio da classe de servico
 
     // Construtor
-    public OrdemServico(Veiculo veiculo, TipoServico tipo) {
+    public OrdemServico(Veiculo veiculo, ServicosGerais tipo) {
         this.veiculo = veiculo;
         this.tipo = tipo;
     }
