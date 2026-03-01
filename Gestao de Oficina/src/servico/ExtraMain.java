@@ -166,7 +166,7 @@ public class ExtraMain {
     }
 
     // op. 4
-    public static void atualizarDadosVeiculo(VeiculoDAO dao, List<Veiculo> patioDinamico){
+    public static void atualizarDadosVeiculo(VeiculoDAO dao, List<Veiculo> patioDinamico, Scanner scanner) throws InterruptedException {
         // ex: mudar o 370z para um 370z NISMO (18 cv a mais)
         System.out.println("\n--- Atualizando Veículo ---");
         Carro atualizado = new Carro("ABC-1234", "Nissan 370z NISMO", 2025, "Carro");
@@ -213,8 +213,8 @@ public class ExtraMain {
         scanner.nextLine(); // Este cara "segura" a tela para você conseguir ler
     }
 
-    // op. 7
-    public static void iniciarFluxoOrcamento(Scanner scanner, VeiculoDAO dao){
+    // op. 7 - Corrigido: Removido o 'os' do parâmetro pois ele é criado aqui dentro
+    public static void iniciarFluxoOrcamento(Scanner scanner, VeiculoDAO dao) {
         System.out.println("\n--- Gerando Orçamento Real ---");
         System.out.print("Digite a placa do veículo cadastrado: ");
         String placaBusca = scanner.nextLine();
@@ -222,41 +222,37 @@ public class ExtraMain {
         Veiculo vEncontrado = dao.buscarPorPlaca(placaBusca);
 
         if (vEncontrado == null) {
-            System.out.println("Mentiroso! n tem veículo");
+            System.out.println("Mentiroso! Não tem veículo.");
             return;
         }
 
-        System.out.println(vEncontrado.getTipo());
-        if ("CARRO".equalsIgnoreCase(vEncontrado.getTipo())){
-            System.out.println("vc definitivamente tem um carro!");
-            menuIniciarFluxoOrcamento(scanner);
-        } else{
-            System.out.println("vc definitivamente tem uma moto!");
-            menuIniciarFluxoOrcamento(scanner);
-        }
+        // criando a OrdemServico aqui
+        OrdemServico novaOS = new OrdemServico(vEncontrado, ServicosGerais.PREVENTIVA);
 
+        System.out.println("Veículo: " + vEncontrado.getModelo());
 
+        // novaOs existe agr!
+        menuIniciarFluxoOrcamento(scanner, novaOS);
 
-            /*ServicoOficina oficinaService = new ServicoOficina();
-            double valorFinal = oficinaService.calcularOrcamento(vEncontrado, pecasParaServico);
+        // e no final de tudo, mostramos o "resultado"
+        System.out.println("\n" + novaOS.getResumo());
+    }
 
-            System.out.println("\n--- RESUMO DO ORÇAMENTO ---");
-            System.out.println("Veículo: " + vEncontrado.getModelo());
-            System.out.println("Total: R$ " + valorFinal);*/
-        }
+    // menu op. 7 - ADICIONADO 'OrdemServico os' nos parâmetros
+    public static void menuIniciarFluxoOrcamento(Scanner scanner, OrdemServico os) {
+        System.out.println("\n=== TIPO DE SERVIÇOS ===");
+        System.out.println("1. " + ServicosGerais.PREVENTIVA.getDescricao());
+        System.out.println("2. " + ServicosGerais.CORRETIVA.getDescricao());
+        System.out.println("3. " + ServicosGerais.ELETRICA.getDescricao());
+        System.out.println("4. " + ServicosGerais.ESTETICA.getDescricao());
+        System.out.println("5. " + ServicosGerais.PNEUS.getDescricao());
+        System.out.print("Escolha uma opção: ");
 
-    // menu op. 7
-    public static void menuIniciarFluxoOrcamento(Scanner scanner){
-        List<Peca> pecasParaServico = new java.util.ArrayList<>();
-        System.out.println("\n===TIPO DE SERVIÇOS===");
-        System.out.println("1. "+ ServicosGerais.PREVENTIVA.getDescricao());
-        System.out.println("2. "+ ServicosGerais.CORRETIVA.getDescricao());
-        System.out.println("3- "+ ServicosGerais.ELETRICA.getDescricao());
-        System.out.println("4. "+ ServicosGerais.ESTETICA.getDescricao());
-        System.out.println("5. "+ ServicosGerais.PNEUS.getDescricao());
-        System.out.println("Escolha uma opção: ");
         int tipo = scanner.nextInt();
-            ServicoOrcamento.exibirMenuServicos(scanner, tipo);
+        scanner.nextLine(); // Limpa buffer
+
+        // Agora o 'os' existe aqui e pode ser passado para a outra classe
+        ServicoOrcamento.exibirMenuServicos(scanner, tipo, os);
     }
 
     // menu principal

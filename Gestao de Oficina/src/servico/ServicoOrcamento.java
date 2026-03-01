@@ -1,27 +1,28 @@
 package servico;
 
+import modelo.OrdemServico;
 import modelo.TipoServico;
 
 import java.util.Scanner;
 
 public class ServicoOrcamento {
     // Menu do orçamento
-    public static void exibirMenuServicos(Scanner scanner, int tipo){
+    public static void exibirMenuServicos(Scanner scanner, int tipo, OrdemServico os){
         switch (tipo){
             case 1:
-                submenuPreventiva(scanner);
+                submenuPreventiva(scanner, os);
                 break;
             case 2:
-                submenuCorretiva(scanner);
+                submenuCorretiva(scanner, os);
                 break;
             case 3:
-                submenuEletrica(scanner);
+                submenuEletrica(scanner, os);
                 break;
             case 4:
-                submenuEstetica(scanner);
+                submenuEstetica(scanner, os);
                 break;
             case 5:
-                submenuPneus(scanner);
+                submenuPneus(scanner, os);
                 break;
             default:
                 System.out.println("Não tinha essa opção...");
@@ -29,7 +30,7 @@ public class ServicoOrcamento {
     }
 
     // menus base para orçamento
-    public static void submenuPreventiva(Scanner scanner) {
+    public static void submenuPreventiva(Scanner scanner, OrdemServico os) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
             System.out.println("Preventiva");
@@ -40,25 +41,51 @@ public class ServicoOrcamento {
             System.out.println("5- " + TipoServico.AlinhaBalanca.getDescricao());
             System.out.println("6- " + TipoServico.Bateria.getDescricao());
             System.out.println("0- Voltar");
-            System.out.print("Escolha uma sub-opção: ");
 
+            System.out.print("Escolha uma sub-opção: ");
             escolhaSub = scanner.nextInt(); // 1o lê para evitar loop infinito
             scanner.nextLine(); // Limpa o buffer
 
             switch (escolhaSub) {
-                case 1: System.out.println(">> Selecionado: Troca de Óleo"); break; // Simplesmente para
-                case 2: System.out.println(">> Selecionado: Revisão de Freios"); break; // deixar mais curto
-                case 3: System.out.println(">> Selecionado: Arrefecimento"); break;
-                case 4: System.out.println(">> Selecionado: Velas e Correias"); break;
-                case 5: System.out.println(">> Selecionado: Alinhamento"); break;
-                case 6: System.out.println(">> Selecionado: Bateria"); break;
-                case 0: System.out.println("Voltando..."); break;
+                case 1: System.out.println(">> Selecionado: \nTroca de Óleo");
+                    os.adicionarSubServico(TipoServico.OleoFiltro);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 2: System.out.println(">> Selecionado: Revisão de Freios");
+                    os.adicionarSubServico(TipoServico.RevFreio);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 3: System.out.println(">> Selecionado: Arrefecimento");
+                    os.adicionarSubServico(TipoServico.Arrefecimento);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 4: System.out.println(">> Selecionado: Velas e Correias");
+                    os.adicionarSubServico(TipoServico.VelasCorreia);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 5: System.out.println(">> Selecionado: Alinhamento");
+                    os.adicionarSubServico(TipoServico.AlinhaBalanca);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 6: System.out.println(">> Selecionado: Bateria");
+                    os.adicionarSubServico(TipoServico.Bateria);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 0: System.out.println("Voltando...");
+                    break;
+
                 default: System.out.println("Opção inválida! >:c");
             }
         }
     }
 
-    public static void submenuCorretiva(Scanner scanner) {
+    public static void submenuCorretiva(Scanner scanner, OrdemServico os) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
             System.out.println("Corretiva");
@@ -74,18 +101,45 @@ public class ServicoOrcamento {
             scanner.nextLine();
 
             switch (escolhaSub) {
-                case 1: System.out.println(">> Selecionado: Reparo de Motor"); break;
-                case 2: System.out.println(">> Selecionado: Suspensão"); break;
-                case 3: System.out.println(">> Selecionado: Direção"); break;
-                case 4: System.out.println(">> Selecionado: Transmissão"); break;
-                case 5: System.out.println(">> Selecionado: Escapamento"); break;
-                case 0: System.out.println("Voltando..."); break;
+                case 1:
+                    System.out.println(">> Selecionado: Reparo de Motor");
+                    os.adicionarSubServico(TipoServico.ReparoMotor);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 2:
+                    System.out.println(">> Selecionado: Suspensão");
+                    os.adicionarSubServico(TipoServico.Suspensao);
+                    System.out.println("Adicionado!");
+                    break;
+
+                    case 3:
+                    System.out.println(">> Selecionado: Direção");
+                    os.adicionarSubServico(TipoServico.Direcao);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 4:
+                    System.out.println(">> Selecionado: Transmissão");
+                    os.adicionarSubServico(TipoServico.TransmissaoEmbreagem);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 5:
+                    System.out.println(">> Selecionado: Escapamento");
+                    os.adicionarSubServico(TipoServico.Escapamento);
+                    System.out.println("Adicionado!");
+                    break;
+
+                case 0:
+                    System.out.println("Voltando...");
+                    break;
                 default: System.out.println("Opção inválida! >:c");
             }
         }
     }
 
-    public static void submenuEletrica(Scanner scanner) {
+    public static void submenuEletrica(Scanner scanner, OrdemServico os) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
             System.out.println("Elétrica");
@@ -100,17 +154,35 @@ public class ServicoOrcamento {
             scanner.nextLine();
 
             switch (escolhaSub) {
-                case 1: System.out.println(">> Selecionado: Diagnóstico"); break;
-                case 2: System.out.println(">> Selecionado: Iluminação"); break;
-                case 3: System.out.println(">> Selecionado: Motor de Arranque"); break;
-                case 4: System.out.println(">> Selecionado: Vidros/Travas"); break;
-                case 0: System.out.println("Voltando..."); break;
+                case 1:
+                    System.out.println(">> Selecionado: Diagnóstico");
+                    os.adicionarSubServico(TipoServico.Diagnostico);
+                    System.out.println("Adicionado!");
+                    break;
+                case 2:
+                    System.out.println(">> Selecionado: Iluminação");
+                    os.adicionarSubServico(TipoServico.Iluminacao);
+                    System.out.println("Adicionado!");
+                break;
+                case 3:
+                    System.out.println(">> Selecionado: Motor de Arranque");
+                    os.adicionarSubServico(TipoServico.MotorArranque);
+                    System.out.println("Adicionado!");
+                    break;
+                case 4:
+                    System.out.println(">> Selecionado: Vidros/Travas");
+                    os.adicionarSubServico(TipoServico.VidrosTravas);
+                    System.out.println("Adicionado!");
+                    break;
+                case 0:
+                    System.out.println("Voltando...");
+                    break;
                 default: System.out.println("Opção inválida! >:c");
             }
         }
     }
 
-    public static void submenuEstetica(Scanner scanner) {
+    public static void submenuEstetica(Scanner scanner, OrdemServico os) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
             System.out.println("Estética");

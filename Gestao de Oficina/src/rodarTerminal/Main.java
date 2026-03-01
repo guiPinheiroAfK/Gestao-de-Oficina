@@ -1,6 +1,7 @@
 package rodarTerminal;
 
 import banco.VeiculoDAO;
+import modelo.OrdemServico;
 import modelo.Veiculo;
 import servico.ExtraMain; // Importa a classe de "package servico"
 import java.util.List;
