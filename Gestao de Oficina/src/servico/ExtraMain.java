@@ -131,7 +131,7 @@ public class ExtraMain {
         }
     }
 
-    // OPÇÃO 4/5: Cadastro de Peças com troca automática de vírgula por ponto
+    // OPÇÃO 4: Cadastro de Peças com troca automática de vírgula por ponto
     public static void cadastrarPecaNoCatalogo(Scanner scanner){
         try {
             System.out.println("\n--- Cadastro de Peça ---");
@@ -152,7 +152,7 @@ public class ExtraMain {
         }
     }
 
-    // OPÇÃO 7: Inicia a Ordem de Serviço vinculada a um veículo existente
+    // OPÇÃO 5: Inicia a Ordem de Serviço vinculada a um veículo existente
     public static void iniciarFluxoOrcamento(Scanner scanner, VeiculoDAO dao) {
         System.out.print("Placa do veículo: ");
         String placa = scanner.nextLine().toUpperCase().trim();
