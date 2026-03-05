@@ -20,20 +20,28 @@ public abstract class Veiculo {
     public String getPlaca() {
         return placa;
     }
-    public void setPlaca() {}
+    public void setPlaca(String placa) {
+        this.placa = placa;
+    }
 
     public String getModelo() {
         return modelo;
     }
-    public void setModelo() {}
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
 
     public int getAno() {
         return ano;
     }
-    public void setAno() {}
+    public void setAno(int ano) {
+        this.ano = ano;
+    }
 
     public String getTipo(){
         return tipo;
     }
-    public void setTipo(){}
+    public void setTipo(String tipo){
+        this.tipo = tipo;
+    }
 }

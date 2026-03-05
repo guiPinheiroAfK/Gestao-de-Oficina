@@ -1,5 +1,8 @@
 package banco;
 
+// DAO - Data Access Object
+//
+
 import modelo.Peca;
 import java.sql.*;
 import java.util.ArrayList;
@@ -19,21 +22,24 @@ public class PecaDAO {
         }
     }
 
-    public List<Peca> buscarTodas() {
-        String sql = "SELECT * FROM pecas";
-        List<Peca> catalogo = new ArrayList<>();
+    // mesma lógica de buscarVeiculos, só que para peças (buscarPecas)
+    public List<Peca> buscarPecas() {
+        String sql = "SELECT * FROM pecas ORDER BY nome";
+        List<Peca> lista = new ArrayList<>();
+
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
+
             while (rs.next()) {
                 Peca p = new Peca(rs.getString("nome"), rs.getDouble("valor"), rs.getInt("estoque"));
                 p.setId(rs.getInt("id"));
-                catalogo.add(p);
+                lista.add(p);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar catálogo: " + e.getMessage());
+            throw new RuntimeException("Erro ao listar peças: " + e.getMessage());
         }
-        return catalogo;
+        return lista;
     }
 
     public Peca buscarPorId(int id) {
@@ -52,5 +58,39 @@ public class PecaDAO {
             throw new RuntimeException("Erro ao buscar peça: " + e.getMessage());
         }
         return null;
+    }
+
+    public void atualizar(Peca peca) {
+        // o SQL usa o ID para saber QUAL registro alterar
+        String sql = "UPDATE pecas SET nome = ?, valor = ?, estoque = ? WHERE id = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, peca.getNome());
+            stmt.setDouble(2, peca.getValor());
+            stmt.setInt(3, peca.getEstoque());
+            stmt.setInt(4, peca.getId()); // Fundamental para o WHERE
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                throw new RuntimeException("Nenhuma peça encontrada com o ID: " + peca.getId());
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar peça: " + e.getMessage());
+        }
+    }
+
+    public void deletar(int id) {
+        String sql = "DELETE FROM pecas WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao deletar: " + e.getMessage());
+        }
     }
 }

@@ -1,7 +1,6 @@
 package rodarTerminal;
 
 import banco.VeiculoDAO;
-import modelo.OrdemServico;
 import modelo.Veiculo;
 import servico.ExtraMain; // Importa a classe de "package servico"
 import java.util.List;
@@ -15,7 +14,7 @@ public class Main {
         VeiculoDAO dao = new VeiculoDAO();
 
         // 2. Joga tudo para uma lista antes de rodar o menu
-        List<Veiculo> patioDinamico = dao.buscarTodos();
+        List<Veiculo> patioDinamico = dao.buscarVeiculos();
         System.out.println("✅ " + patioDinamico.size() + " veículos carregados do banco!");
         // Faz o mesmo que o "sleep() " em C
         TimeUnit.SECONDS.sleep(2);

@@ -1,5 +1,7 @@
 package banco;
 
+// DAO - Data Access Object
+
 import modelo.*;
 
 import java.sql.Connection;
@@ -33,7 +35,7 @@ public class VeiculoDAO {
     }
 
     // busca eles para serem listados
-    public List<Veiculo> buscarTodos() {
+    public List<Veiculo> buscarVeiculos() {
         String sql = "SELECT * FROM veiculos";
 
         try (Connection conn = ConnectionFactory.getConnection();
