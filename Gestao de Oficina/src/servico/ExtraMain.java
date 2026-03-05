@@ -219,9 +219,9 @@ public class ExtraMain {
             // 4. Sincroniza a lista da memória (patioDinamico) com o banco
             atualizarListaLocal(patioDinamico, dao);
 
-            System.out.println("✨ Processo de atualização concluído!");
+            System.out.println("Processo de atualização concluído!");
         } else {
-            System.out.println("❌ Erro: Veículo com placa " + placaBusca + " não encontrado no sistema.");
+            System.out.println("Erro: Veículo com placa " + placaBusca + " não encontrado no sistema.");
         }
 
         TimeUnit.SECONDS.sleep(1);
@@ -330,7 +330,7 @@ public class ExtraMain {
                 System.out.println("Remoção cancelada.");
             }
         } else {
-            System.out.println("❌ ID não encontrado.");
+            System.out.println("ID não encontrado.");
         }
     }
 
