@@ -24,14 +24,14 @@ Sistema de gerenciamento de oficina desenvolvido em **Java SE** para operação 
 **Siga os passos abaixo para configurar o ambiente e executar a aplicação:**
 
 - **1. Preparação do Banco de Dados**
-  Certifique-se de que o PostgreSQL está instalado e rodando. No seu terminal SQL ou pgAdmin:
+Certifique-se de que o PostgreSQL está instalado e rodando. No seu terminal SQL ou pgAdmin:
 
 Crie um banco de dados chamado oficina_db.
 
 Execute o script contido no arquivo schema.sql (localizado na raiz do projeto) para criar as tabelas e inserir os dados iniciais de teste.
 
 - **2. Configuração de Acesso**
-  No IntelliJ, abra o arquivo src/banco/ConnectionFactory.java. Verifique se as credenciais batem com a sua instalação local:
+No IntelliJ, abra o arquivo src/banco/ConnectionFactory.java. Verifique se as credenciais batem com a sua instalação local:
 
 URL: jdbc:postgresql://localhost:5433/oficina_db
 
@@ -41,7 +41,7 @@ Senha: admin
 (Dica: Se você não usa Docker, a porta padrão costuma ser 5432).
 
 - **3. Execução**
-  Importe o projeto como um projeto Maven para que as dependências do arquivo pom.xml sejam baixadas automaticamente.
+Importe o projeto como um projeto Maven para que as dependências do arquivo pom.xml sejam baixadas automaticamente.
 
 Navegue até a classe Main.java no pacote rodarTerminal.
 
