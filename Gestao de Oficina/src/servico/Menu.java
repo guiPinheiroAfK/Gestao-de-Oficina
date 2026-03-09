@@ -19,6 +19,10 @@ public class Menu {
 
         try {
             ExtraMain.atualizarListaLocal(patioDinamico, dao);
+
+            System.out.println("✅ " + patioDinamico.size() + " veículos carregados do banco!");
+            // Faz o mesmo que o "sleep() " em C
+            TimeUnit.SECONDS.sleep(2);
         } catch (RuntimeException e) {
             System.out.println("Aviso ao carregar patio: " + e.getMessage());
         }
@@ -26,10 +30,6 @@ public class Menu {
         int opcao = -1;
 
         while (opcao != 0) {
-            System.out.println("✅ " + patioDinamico.size() + " veículos carregados do banco!");
-            // Faz o mesmo que o "sleep() " em C
-            TimeUnit.SECONDS.sleep(2);
-
 
             ExtraMain.limparTela();
             System.out.println("========================================");
