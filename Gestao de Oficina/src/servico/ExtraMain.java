@@ -9,11 +9,13 @@ import java.util.Scanner;
 
 public class ExtraMain {
 
+    // sincroniza a lista de veículos na memória com os dados atuais do banco
     public static void atualizarListaLocal(List<Veiculo> veiculos, VeiculoDAO dao) {
         veiculos.clear();
         veiculos.addAll(dao.buscarVeiculos());
     }
 
+    // "limpa" o terminal
     public static void limparTela() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
@@ -22,11 +24,13 @@ public class ExtraMain {
         }
     }
 
+    // cria uma pausa para que o usuário consiga ler as mensagens na tela
     private static void pausar(Scanner scanner) {
         System.out.print("\nPressione ENTER para continuar...");
         scanner.nextLine();
     }
 
+    // garante que a entrada seja um número inteiro válido
     private static int lerInteiro(Scanner scanner, String mensagem) {
         while (true) {
             System.out.print(mensagem);
@@ -39,6 +43,7 @@ public class ExtraMain {
         }
     }
 
+    // lê valores decimais, aceitando tanto vírgula quanto ponto como separador
     private static double lerDouble(Scanner scanner, String mensagem) {
         while (true) {
             System.out.print(mensagem);
@@ -51,6 +56,7 @@ public class ExtraMain {
         }
     }
 
+    // exibe uma tabela simplificada de veículos no console
     private static void exibirListaSimples(List<Veiculo> lista) {
         if (lista.isEmpty()) {
             System.out.println("Nenhum veiculo encontrado.");
@@ -64,6 +70,7 @@ public class ExtraMain {
         }
     }
 
+    // filtra a busca no banco conforme a escolha
     private static List<Veiculo> buscarPorEscopo(VeiculoDAO dao, int escopo) {
         if (escopo == 1) {
             return dao.buscarPorTipo("CARRO");
@@ -74,6 +81,7 @@ public class ExtraMain {
         return dao.buscarVeiculos();
     }
 
+    // verifica se um veículo específico pertence ao tipo selecionado no menu
     private static boolean tipoCompativel(Veiculo v, int escopo) {
         if (escopo == 1) {
             return "CARRO".equals(v.getTipo());
@@ -84,6 +92,7 @@ public class ExtraMain {
         return true;
     }
 
+    // submenu para definir se o novo cadastro será de Carro ou Moto
     private static int selecionarTipoCadastro(Scanner scanner) {
         while (true) {
             limparTela();
@@ -102,6 +111,7 @@ public class ExtraMain {
         }
     }
 
+    // menu generico para selecionar o filtro de visualização
     private static int selecionarEscopoVeiculo(Scanner scanner, String titulo) {
         while (true) {
             limparTela();
@@ -121,6 +131,7 @@ public class ExtraMain {
         }
     }
 
+    // valida a placa usando regex para o padrão Mercosul (ex: ABC1D23)
     private static String lerPlaca(Scanner scanner, boolean permitirVoltar) {
         while (true) {
             System.out.print("Digite a placa (ABC1D23)" + (permitirVoltar ? " ou 0 para voltar" : "") + ": ");
@@ -136,6 +147,7 @@ public class ExtraMain {
         }
     }
 
+    // valida a marca: apenas letras/espaços
     private static String lerMarca(Scanner scanner, boolean permitirVazio, String atual) {
         while (true) {
             String mensagem = permitirVazio
@@ -160,6 +172,7 @@ public class ExtraMain {
         }
     }
 
+    // valida o modelo, não permite campos vazios no cadastro inicial
     private static String lerModelo(Scanner scanner, boolean permitirVazio, String atual) {
         while (true) {
             String mensagem = permitirVazio
@@ -181,6 +194,7 @@ public class ExtraMain {
         }
     }
 
+    // valida o ano, restringe ao intervalo histórico
     private static int lerAno(Scanner scanner, boolean permitirVazio, int atual) {
         while (true) {
             String mensagem = permitirVazio
@@ -206,6 +220,7 @@ public class ExtraMain {
         }
     }
 
+    // fluxo completo de cadastro, verificando duplicidade de placa antes de salvar
     public static void cadastrarVeiculo(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao) {
         int tipoSelecionado = selecionarTipoCadastro(scanner);
         if (tipoSelecionado == 0) {
@@ -245,6 +260,7 @@ public class ExtraMain {
         pausar(scanner);
     }
 
+    // fluxo de exclusão, filtra por tipo e confirma a placa antes de deletar do banco
     public static void removerVeiculoPorPlaca(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao) {
         int escopo = selecionarEscopoVeiculo(scanner, "Excluir Veiculo");
         if (escopo == 0) {
@@ -300,6 +316,7 @@ public class ExtraMain {
         }
     }
 
+    // permite listar tudo ou aplicar filtros específicos
     public static void listarVeiculosNoPatio(Scanner scanner, VeiculoDAO dao) {
         int escopo = -1;
         String filtroTipo = null;
@@ -394,6 +411,7 @@ public class ExtraMain {
         pausar(scanner);
     }
 
+    // busca o veículo e permite alterar campos individualmente
     public static void atualizarDadosVeiculo(VeiculoDAO dao, List<Veiculo> patioDinamico, Scanner scanner) {
         int escopo = selecionarEscopoVeiculo(scanner, "Atualizar Veiculo");
         if (escopo == 0) {
@@ -433,12 +451,14 @@ public class ExtraMain {
         String novaPlacaInput = scanner.nextLine().toUpperCase().trim();
         String novaPlaca = novaPlacaInput.isEmpty() ? placaAntiga : novaPlacaInput;
 
+        // permite alterar a placa, mas valida se a nova já não existe para outro veículo
         if (!novaPlaca.equals(placaAntiga) && dao.buscarPorPlaca(novaPlaca) != null) {
             System.out.println("Erro: A nova placa já está cadastrada em outro veículo.");
             pausar(scanner);
             return;
         }
 
+        // atualiza os outros campos permitindo manter os valores atuais com ENTER
         String novaMarca = lerMarca(scanner, true, encontrado.getMarca());
         String novoModelo = lerModelo(scanner, true, encontrado.getModelo());
         int novoAno = lerAno(scanner, true, encontrado.getAno());
@@ -460,6 +480,7 @@ public class ExtraMain {
         pausar(scanner);
     }
 
+    // metodo para listar todas as peças cadastradas no catálogo
     private static void listarCatalogoPecas() {
         List<Peca> lista = new PecaDAO().buscarPecas();
         if (lista.isEmpty()) {
@@ -474,6 +495,7 @@ public class ExtraMain {
         }
     }
 
+    // gerenciamento de estoque de peças, permite cadastrar, editar e excluir
     public static void gerenciarPecas(Scanner scanner) {
         PecaDAO dao = new PecaDAO();
 
@@ -519,6 +541,7 @@ public class ExtraMain {
                             System.out.println("Peca nao encontrada.");
                             break;
                         }
+                        // só altera o que o usuário digitar
                         System.out.print("Novo nome (ENTER para manter '" + pecaAtual.getNome() + "'): ");
                         String novoNome = scanner.nextLine().trim();
                         if (!novoNome.isEmpty()) {
@@ -575,6 +598,7 @@ public class ExtraMain {
         }
     }
 
+    // apenas visualização do catálogo
     public static void exibirCatalogoDePecas(Scanner scanner) {
         limparTela();
         try {
@@ -585,6 +609,7 @@ public class ExtraMain {
         pausar(scanner);
     }
 
+    // inicia a criação de uma simulação de orçamento vinculada a um veículo real
     public static void iniciarFluxoOrcamento(Scanner scanner, VeiculoDAO dao) {
         int escopo = selecionarEscopoVeiculo(scanner, "Simular Orcamento");
         if (escopo == 0) {
@@ -618,14 +643,18 @@ public class ExtraMain {
             return;
         }
 
+        // cria a ordem de serviço inicial (PREVENTIVA) e abre o menu de customização
         OrdemServico os = new OrdemServico(v, ServicosGerais.PREVENTIVA);
         System.out.println("Veiculo: " + v.getModelo() + " - " + v.getPlaca());
         menuIniciarFluxoOrcamento(scanner, os);
+
+        // exibe o resumo final do orçamento simulado
         System.out.println(os.getResumo());
         if (scanner.hasNextLine()) scanner.nextLine();
         pausar(scanner);
     }
 
+    // submenu para escolher a categoria de serviço do orçamento (baseado no Enum ServicosGerais)
     public static void menuIniciarFluxoOrcamento(Scanner scanner, OrdemServico os) {
         while (true) {
             System.out.println("1 - Preventiva");
