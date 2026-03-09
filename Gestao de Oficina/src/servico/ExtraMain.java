@@ -1,20 +1,308 @@
 package servico;
 
+import banco.PecaDAO;
 import banco.VeiculoDAO;
 import modelo.*;
-import banco.PecaDAO;
-import modelo.Peca;
+
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
-// "ai q nome feio"... faltou criatividade :c
 public class ExtraMain {
 
-    // atualizarListaLocal, ja tava na main antes >:c
+    // sincroniza a lista de veículos na memória com os dados atuais do banco
     public static void atualizarListaLocal(List<Veiculo> veiculos, VeiculoDAO dao) {
         veiculos.clear();
         veiculos.addAll(dao.buscarVeiculos());
+    }
+
+    // "limpa" o terminal
+    public static void limparTela() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+        for (int i = 0; i < 20; i++) {
+            System.out.println();
+        }
+    }
+
+    // cria uma pausa para que o usuário consiga ler as mensagens na tela
+    private static void pausar(Scanner scanner) {
+        System.out.print("\nPressione ENTER para continuar...");
+        scanner.nextLine();
+    }
+
+    // garante que a entrada seja um número inteiro válido
+    private static int lerInteiro(Scanner scanner, String mensagem) {
+        while (true) {
+            System.out.print(mensagem);
+            String entrada = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(entrada);
+            } catch (NumberFormatException e) {
+                System.out.println("Digite apenas numeros.");
+            }
+        }
+    }
+
+    // lê valores decimais, aceitando tanto vírgula quanto ponto como separador
+    private static double lerDouble(Scanner scanner, String mensagem) {
+        while (true) {
+            System.out.print(mensagem);
+            String entrada = scanner.nextLine().trim().replace(",", ".");
+            try {
+                return Double.parseDouble(entrada);
+            } catch (NumberFormatException e) {
+                System.out.println("Valor invalido.");
+            }
+        }
+    }
+
+    // exibe uma tabela simplificada de veículos no console
+    private static void exibirListaSimples(List<Veiculo> lista) {
+        if (lista.isEmpty()) {
+            System.out.println("Nenhum veiculo encontrado.");
+            return;
+        }
+
+        System.out.println("\n--- Veiculos ---");
+        for (Veiculo v : lista) {
+            System.out.printf("Tipo: %-5s | Placa: %-8s | Marca: %-15s | Modelo: %-15s | Ano: %d%n",
+                    v.getTipo(), v.getPlaca(), v.getMarca(), v.getModelo(), v.getAno());
+        }
+    }
+
+    // filtra a busca no banco conforme a escolha
+    private static List<Veiculo> buscarPorEscopo(VeiculoDAO dao, int escopo) {
+        if (escopo == 1) {
+            return dao.buscarPorTipo("CARRO");
+        }
+        if (escopo == 2) {
+            return dao.buscarPorTipo("MOTO");
+        }
+        return dao.buscarVeiculos();
+    }
+
+    // verifica se um veículo específico pertence ao tipo selecionado no menu
+    private static boolean tipoCompativel(Veiculo v, int escopo) {
+        if (escopo == 1) {
+            return "CARRO".equals(v.getTipo());
+        }
+        if (escopo == 2) {
+            return "MOTO".equals(v.getTipo());
+        }
+        return true;
+    }
+
+    // submenu para definir se o novo cadastro será de Carro ou Moto
+    private static int selecionarTipoCadastro(Scanner scanner) {
+        while (true) {
+            limparTela();
+            System.out.println("==============================");
+            System.out.println("   Cadastro de Veiculo");
+            System.out.println("==============================");
+            System.out.println("1 - Carro");
+            System.out.println("2 - Moto");
+            System.out.println("0 - Voltar");
+            int opcao = lerInteiro(scanner, "Escolha: ");
+            if (opcao == 0 || opcao == 1 || opcao == 2) {
+                return opcao;
+            }
+            System.out.println("Opcao invalida.");
+            pausar(scanner);
+        }
+    }
+
+    // menu generico para selecionar o filtro de visualização
+    private static int selecionarEscopoVeiculo(Scanner scanner, String titulo) {
+        while (true) {
+            limparTela();
+            System.out.println("==============================");
+            System.out.println("  " + titulo);
+            System.out.println("==============================");
+            System.out.println("1 - Carro");
+            System.out.println("2 - Moto");
+            System.out.println("3 - Ambos");
+            System.out.println("0 - Voltar");
+            int opcao = lerInteiro(scanner, "Escolha: ");
+            if (opcao >= 0 && opcao <= 3) {
+                return opcao;
+            }
+            System.out.println("Opcao invalida.");
+            pausar(scanner);
+        }
+    }
+
+    // valida a placa usando regex para o padrão Mercosul (ex: ABC1D23)
+    private static String lerPlaca(Scanner scanner, boolean permitirVoltar) {
+        while (true) {
+            System.out.print("Digite a placa (ABC1D23)" + (permitirVoltar ? " ou 0 para voltar" : "") + ": ");
+            String placa = scanner.nextLine().toUpperCase().trim();
+
+            if (permitirVoltar && "0".equals(placa)) {
+                return null;
+            }
+            if (placa.matches("[A-Z]{3}[0-9][A-Z0-9][0-9]{2}")) {
+                return placa;
+            }
+            System.out.println("Placa invalida.");
+        }
+    }
+
+    // valida a marca: apenas letras/espaços
+    private static String lerMarca(Scanner scanner, boolean permitirVazio, String atual) {
+        while (true) {
+            String mensagem = permitirVazio
+                    ? "Marca (max 15 letras, ENTER para manter '" + atual + "'): "
+                    : "Marca (max 15 letras): ";
+
+            System.out.print(mensagem);
+            String marca = scanner.nextLine().trim().toUpperCase();
+
+            if (permitirVazio && marca.isEmpty()) {
+                return atual;
+            }
+            if (marca.length() > 15) {
+                System.out.println("Marca deve ter no maximo 15 letras.");
+                continue;
+            }
+            if (!marca.matches("[\\p{L} ]+")) {
+                System.out.println("Marca aceita apenas letras e espacos.");
+                continue;
+            }
+            return marca;
+        }
+    }
+
+    // valida o modelo, não permite campos vazios no cadastro inicial
+    private static String lerModelo(Scanner scanner, boolean permitirVazio, String atual) {
+        while (true) {
+            String mensagem = permitirVazio
+                    ? "Modelo ( ENTER para manter '" + atual + "'): "
+                    : "Modelo: ";
+
+            System.out.print(mensagem);
+            String modelo = scanner.nextLine().trim().toUpperCase();
+
+            if (permitirVazio && modelo.isEmpty()) {
+                return atual;
+            }
+            if (modelo.isEmpty()) {
+                System.out.println("Modelo nao pode ficar vazio.");
+                continue;
+            }
+
+            return modelo;
+        }
+    }
+
+    // valida o ano, restringe ao intervalo histórico
+    private static int lerAno(Scanner scanner, boolean permitirVazio, int atual) {
+        while (true) {
+            String mensagem = permitirVazio
+                    ? "Ano (1891-2026, ENTER para manter " + atual + "): "
+                    : "Ano (1891-2026): ";
+
+            System.out.print(mensagem);
+            String entrada = scanner.nextLine().trim();
+
+            if (permitirVazio && entrada.isEmpty()) {
+                return atual;
+            }
+
+            try {
+                int ano = Integer.parseInt(entrada);
+                if (ano >= 1891 && ano <= 2026) {
+                    return ano;
+                }
+                System.out.println("Ano fora do intervalo permitido.");
+            } catch (NumberFormatException e) {
+                System.out.println("Digite apenas numeros para o ano.");
+            }
+        }
+    }
+
+    // fluxo completo de cadastro, verificando duplicidade de placa antes de salvar
+    public static void cadastrarVeiculo(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao) {
+        int tipoSelecionado = selecionarTipoCadastro(scanner);
+        if (tipoSelecionado == 0) {
+            return;
+        }
+
+        limparTela();
+        System.out.println("--- Cadastro de Veiculo ---");
+        String placa;
+        while (true) {
+            placa = lerPlaca(scanner, true);
+            if (placa == null) {
+                return;
+            }
+            if (dao.buscarPorPlaca(placa) != null) {
+                System.out.println("Essa placa ja esta cadastrada em outro veiculo.");
+                continue;
+            }
+            break;
+        }
+
+        String marca = lerMarca(scanner, false, "");
+        String modelo = lerModelo(scanner, false, "");
+        int ano = lerAno(scanner, false, 0);
+
+        Veiculo v = (tipoSelecionado == 1)
+                ? new Carro(placa, marca, modelo, ano)
+                : new Moto(placa, marca, modelo, ano);
+
+        try {
+            dao.salvar(v);
+            atualizarListaLocal(patioDinamico, dao);
+            System.out.println("Veiculo cadastrado com sucesso.");
+        } catch (RuntimeException e) {
+            System.out.println("Falha no cadastro: " + e.getMessage());
+        }
+        pausar(scanner);
+    }
+
+    // fluxo de exclusão, filtra por tipo e confirma a placa antes de deletar do banco
+    public static void removerVeiculoPorPlaca(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao) {
+        int escopo = selecionarEscopoVeiculo(scanner, "Excluir Veiculo");
+        if (escopo == 0) {
+            return;
+        }
+
+        List<Veiculo> lista = buscarPorEscopo(dao, escopo);
+        limparTela();
+        exibirListaSimples(lista);
+
+        if (lista.isEmpty()) {
+            pausar(scanner);
+            return;
+        }
+
+        String placa = lerPlaca(scanner, true);
+        if (placa == null) {
+            return;
+        }
+
+        Veiculo encontrado = dao.buscarPorPlaca(placa);
+        if (encontrado == null) {
+            System.out.println("Placa nao encontrada.");
+            pausar(scanner);
+            return;
+        }
+
+        if (!tipoCompativel(encontrado, escopo)) {
+            System.out.println("Veiculo encontrado, mas nao corresponde ao tipo escolhido.");
+            pausar(scanner);
+            return;
+        }
+
+        boolean removido = dao.deletar(placa);
+        atualizarListaLocal(patioDinamico, dao);
+
+        if (removido) {
+            System.out.println("Veiculo excluido com sucesso.");
+        } else {
+            System.out.println("Nao foi possivel excluir o veiculo.");
+        }
+        pausar(scanner);
     }
 
     // evita que tenhamos que repetir loops de impressão em cada 'case' do menu.
@@ -23,83 +311,13 @@ public class ExtraMain {
             System.out.println("Nada encontrado! :c");
         } else {
             for (Veiculo v : lista) {
-                System.out.println("Modelo: " + v.getModelo() + " | Placa: " + v.getPlaca() + " | Ano: " + v.getAno());
+                System.out.println("Marca: " + v.getMarca() + " | Modelo: " + v.getModelo() + " | Placa: " + v.getPlaca() + " | Ano: " + v.getAno());
             }
-            TimeUnit.SECONDS.sleep(2);
         }
     }
 
-    // op. 1
-    public static void cadastrarVeiculo(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao){
-        try {
-            System.out.println("\n--- Cadastro de Veículo ---");
-
-            // validação de placa: aceita padrão antigo (AAA1234) e Mercosul (AAA1A23)
-            String placaNovo;
-            while (true) {
-                System.out.print("Digite a Placa (7 caracteres): ");
-                placaNovo = scanner.nextLine().toUpperCase().trim();
-                if (placaNovo.matches("[A-Z]{3}[0-9][A-Z0-9][0-9]{2}")) break;
-                else System.out.println(" Erro: Padrão de placa inválido!");
-            }
-
-            // validação de Modelo: regex [a-zA-Z0-9 ]+ impede caracteres como . , / *
-            String modeloNovo;
-            while (true) {
-                System.out.print("Digite o Modelo: ");
-                modeloNovo = scanner.nextLine().trim();
-                if (modeloNovo.matches("[a-zA-Z0-9 ]+")) break;
-                else System.out.println(" Erro: Não use símbolos como '.' ',' etc no modelo!");
-            }
-
-            // validação de ano: trava entre o 1º carro no Brasil (1891) e o ano atual (2026)
-            int anoNovo = 0;
-            while (true) {
-                System.out.print("Digite o Ano (1891 - 2026): ");
-                try {
-                    // Integer.parseInt para evitar que letras quebrem o Scanner
-                    anoNovo = Integer.parseInt(scanner.nextLine());
-                    if (anoNovo >= 1891 && anoNovo <= 2026) break;
-                    else System.out.println(" Ano inválido! No Brasil, apenas veículos entre 1891 e 2026.");
-                } catch (NumberFormatException e) {
-                    System.out.println(" Erro: Digite apenas números inteiros.");
-                }
-            }
-
-            // validação de tipo: só permite os tipos que o sistema conhece
-            String tipoNovo;
-            while(true) {
-                System.out.print("Tipo (CARRO/MOTO): ");
-                tipoNovo = scanner.nextLine().toUpperCase().trim();
-                if(tipoNovo.equals("CARRO") || tipoNovo.equals("MOTO")) break;
-                System.out.println(" Use apenas CARRO ou MOTO.");
-            }
-
-            // polimorfismo: decide qual classe instanciar baseada no tipo
-            Veiculo v = tipoNovo.equals("CARRO")
-                    ? new Carro(placaNovo, modeloNovo, anoNovo, tipoNovo)
-                    : new Moto(placaNovo, modeloNovo, anoNovo, tipoNovo);
-
-            dao.salvar(v, tipoNovo); // salva no banco
-            atualizarListaLocal(patioDinamico, dao); // atualiza lista local
-
-            System.out.println("\n✅ Veículo " + v.getModelo() + " cadastrado com sucesso!");
-        } catch (RuntimeException e) {
-            System.out.println("⚠️ Erro ao cadastrar: " + e.getMessage());
-        }
-    }
-
-    // op. 2
-    public static void removerVeiculoPorPlaca(Scanner scanner, List<Veiculo> patioDinamico, VeiculoDAO dao){
-        System.out.print("Digite a placa para apagar: ");
-        String placa = scanner.nextLine().toUpperCase().trim();
-        dao.deletar(placa);
-        atualizarListaLocal(patioDinamico, dao); // recarrega a lista
-        System.out.println(" Comando de remoção enviado.");
-    }
-
-    // op. 3
-    public static void listarVeiculosNoPatio(Scanner scanner, VeiculoDAO dao) throws InterruptedException {
+    // permite listar tudo ou aplicar filtros específicos
+    public static void listarVeiculosNoPatio(Scanner scanner, VeiculoDAO dao) {
         int escopo = -1;
         String filtroTipo = null;
 
@@ -131,7 +349,8 @@ public class ExtraMain {
             System.out.println("Listando: " + (filtroTipo == null ? "TODOS" : filtroTipo + "S"));
             System.out.println("1 - Listar Todos");
             System.out.println("2 - Listar por Ano");
-            System.out.println("3 - Listar por Modelo");
+            System.out.println("3 - Listar por Marca");
+            System.out.println("4 - Listar por Modelo");
             System.out.println("0 - Voltar ao Menu Principal");
             System.out.println("------------------------------");
             System.out.println("Escolha uma opção: ");
@@ -149,11 +368,11 @@ public class ExtraMain {
                         System.out.println("1 - Ver todos em ordem crescente");
                         System.out.println("2 - Buscar um ano específico");
                         System.out.print("Escolha uma opção: ");
-                        int subOpcaoAno = scanner.nextInt();
+                        int subOpcaoAno = Integer.parseInt(scanner.nextLine());
                         scanner.nextLine();
 
                         if (subOpcaoAno == 1) {
-                            exibirLista(dao.buscarOrdenadoPorAno(filtroTipo));
+                            exibirLista(dao.buscarOrdenadoPorAno());
                         } else if (subOpcaoAno == 2) {
                             System.out.print("Digite o ano desejado: ");
                             int anoBusca = scanner.nextInt();
@@ -165,8 +384,18 @@ public class ExtraMain {
                         break;
 
                     case 3:
+                        System.out.print("\n--- Filtrar por Marca ---\n");
+                        System.out.print("Digite a marca desejada: ");
+                        String marcaBusca = scanner.nextLine().trim().toUpperCase();
+
+                        exibirLista(dao.buscarPorMarcaETipo(marcaBusca, filtroTipo));
+                        break;
+
+
+                    case 4:
                         System.out.print("Digite o modelo: ");
-                        String modelo = scanner.nextLine();
+                        String modelo = scanner.nextLine().trim().toUpperCase();
+
                         exibirLista( dao.buscarPorModeloETipo(modelo, filtroTipo));
                         break;
 
@@ -179,282 +408,271 @@ public class ExtraMain {
 
         // todos os salvar/buscar/deletar estao no "banco.VeiculoDAO"
         // e as heranças/polimorfismo estão no "modelo."
+        pausar(scanner);
     }
 
-    // op. 4
-    public static void atualizarDadosVeiculo(VeiculoDAO dao, List<Veiculo> patioDinamico, Scanner scanner) throws InterruptedException {
-        // ex: mudar o 370z para um 370z NISMO (18 cv a mais)
-        System.out.println("\n--- 📝 Atualizando Dados de Veículo ---");
-        System.out.print("Digite a placa do veículo que deseja alterar: ");
-        String placaBusca = scanner.nextLine().toUpperCase().trim();
-
-        // 1. Tenta buscar o veículo no banco pela placa
-        Veiculo vEncontrado = dao.buscarPorPlaca(placaBusca);
-
-
-        if (vEncontrado != null) {
-            System.out.println("Veículo encontrado: " + vEncontrado.getModelo() + " (" + vEncontrado.getAno() + ")");
-
-            // 2. Coleta os novos dados
-            System.out.print("Novo Modelo (Deixe vazio para manter [" + vEncontrado.getModelo() + "]): ");
-            String novoModelo = scanner.nextLine().trim();
-            if (!novoModelo.isEmpty()) {
-                vEncontrado.setModelo(novoModelo);
-            }
-
-            System.out.print("Novo Ano (Deixe vazio para manter [" + vEncontrado.getAno() + "]): ");
-            String novoAnoStr = scanner.nextLine().trim();
-            if (!novoAnoStr.isEmpty()) {
-                try {
-                    int novoAno = Integer.parseInt(novoAnoStr);
-                    vEncontrado.setAno(novoAno);
-                } catch (NumberFormatException e) {
-                    System.out.println("Ano inválido! Mantendo o ano anterior.");
-                }
-            }
-
-            // 3. Envia o objeto atualizado para o banco
-            dao.atualizar(vEncontrado);
-
-            // 4. Sincroniza a lista da memória (patioDinamico) com o banco
-            atualizarListaLocal(patioDinamico, dao);
-
-            System.out.println("Processo de atualização concluído!");
-        } else {
-            System.out.println("Erro: Veículo com placa " + placaBusca + " não encontrado no sistema.");
-        }
-
-        TimeUnit.SECONDS.sleep(1);
-    }
-
-    // op. 5
-    public static void cadastrarPecaNoCatalogo(Scanner scanner){
-        PecaDAO pecaDao = new PecaDAO();
-        int opcao = -1;
-
-        while (opcao != 0) {
-            System.out.println("\n--- GESTÃO DE CATÁLOGO DE PEÇAS ---");
-            System.out.println("1 - Cadastrar Nova Peça");
-            System.out.println("2 - Atualizar Peça (Preço/Estoque/Nome)");
-            System.out.println("3 - Apagar Peça do Sistema");
-            System.out.println("0 - Voltar ao Menu Principal");
-            System.out.print("Escolha uma opção: ");
-
-            try {
-                opcao = Integer.parseInt(scanner.nextLine());
-
-                switch (opcao) {
-                    case 1:
-                        executarCadastroPeca(scanner, pecaDao);
-                        break;
-                    case 2:
-                        executarAtualizacaoPeca(scanner, pecaDao);
-                        break;
-                    case 3:
-                        executarRemocaoPeca(scanner, pecaDao);
-                        break;
-                    case 0:
-                        System.out.println("Voltando...");
-                        break;
-                    default:
-                        System.out.println("Opção inválida!");
-                }
-            } catch (Exception e) {
-                System.out.println("Erro: Digite um número válido.");
-            }
-        }
-    }
-
-    private static void executarCadastroPeca(Scanner scanner, PecaDAO dao) {
-        System.out.println("\n--- Novo Cadastro ---");
-        System.out.print("Nome: ");
-        String nome = scanner.nextLine().trim();
-        System.out.print("Valor (R$): ");
-        double valor = Double.parseDouble(scanner.nextLine().replace(",", "."));
-        System.out.print("Estoque Inicial: ");
-        int qtd = Integer.parseInt(scanner.nextLine());
-
-        dao.salvar(new Peca(nome, valor, qtd));
-        System.out.println("✅ Peça salva no catálogo!");
-    }
-
-    private static void executarAtualizacaoPeca(Scanner scanner, PecaDAO dao) {
-        // Lista as peças para o usuário ver os IDs antes de escolher
-        List<Peca> pecas = dao.buscarPecas();
-        if (pecas.isEmpty()) {
-            System.out.println("O catálogo está vazio!");
+    // busca o veículo e permite alterar campos individualmente
+    public static void atualizarDadosVeiculo(VeiculoDAO dao, List<Veiculo> patioDinamico, Scanner scanner) {
+        int escopo = selecionarEscopoVeiculo(scanner, "Atualizar Veiculo");
+        if (escopo == 0) {
             return;
         }
 
-        System.out.println("\n--- Peças Disponíveis ---");
-        for (Peca p : pecas) {
-            System.out.printf("ID: %d | Nome: %s | Preço: R$ %.2f | Estoque: %d\n",
+        List<Veiculo> lista = buscarPorEscopo(dao, escopo);
+        limparTela();
+        exibirListaSimples(lista);
+
+        if (lista.isEmpty()) {
+            pausar(scanner);
+            return;
+        }
+
+        String placa = lerPlaca(scanner, true);
+        if (placa == null) {
+            return;
+        }
+
+        Veiculo encontrado = dao.buscarPorPlaca(placa);
+        if (encontrado == null) {
+            System.out.println("Placa nao encontrada.");
+            pausar(scanner);
+            return;
+        }
+
+        if (!tipoCompativel(encontrado, escopo)) {
+            System.out.println("Veiculo encontrado, mas nao corresponde ao tipo escolhido.");
+            pausar(scanner);
+            return;
+        }
+
+        String placaAntiga = encontrado.getPlaca();
+
+        System.out.print("Nova Placa (ENTER para manter '" + placaAntiga + "'): ");
+        String novaPlacaInput = scanner.nextLine().toUpperCase().trim();
+        String novaPlaca = novaPlacaInput.isEmpty() ? placaAntiga : novaPlacaInput;
+
+        // permite alterar a placa, mas valida se a nova já não existe para outro veículo
+        if (!novaPlaca.equals(placaAntiga) && dao.buscarPorPlaca(novaPlaca) != null) {
+            System.out.println("Erro: A nova placa já está cadastrada em outro veículo.");
+            pausar(scanner);
+            return;
+        }
+
+        // atualiza os outros campos permitindo manter os valores atuais com ENTER
+        String novaMarca = lerMarca(scanner, true, encontrado.getMarca());
+        String novoModelo = lerModelo(scanner, true, encontrado.getModelo());
+        int novoAno = lerAno(scanner, true, encontrado.getAno());
+
+        encontrado.setPlaca(novaPlaca);
+        encontrado.setMarca(novaMarca);
+        encontrado.setModelo(novoModelo);
+        encontrado.setAno(novoAno);
+
+        boolean atualizado = dao.atualizar(encontrado, placaAntiga);
+        atualizarListaLocal(patioDinamico, dao);
+
+        if (atualizado) {
+            System.out.println("Veiculo atualizado com sucesso.");
+        } else {
+            System.out.println("Nao foi possivel atualizar o veiculo.");
+        }
+
+        pausar(scanner);
+    }
+
+    // metodo para listar todas as peças cadastradas no catálogo
+    private static void listarCatalogoPecas() {
+        List<Peca> lista = new PecaDAO().buscarPecas();
+        if (lista.isEmpty()) {
+            System.out.println("Catalogo vazio.");
+            return;
+        }
+
+        System.out.println("\n--- Catalogo de Pecas ---");
+        for (Peca p : lista) {
+            System.out.printf("ID: %d | Nome: %-20s | Valor: R$ %.2f | Estoque: %d%n",
                     p.getId(), p.getNome(), p.getValor(), p.getEstoque());
         }
-
-        System.out.print("\nDigite o ID da peça que deseja editar: ");
-        int id = Integer.parseInt(scanner.nextLine());
-
-        Peca p = dao.buscarPorId(id);
-        if (p != null) {
-            System.out.print("Novo Nome [" + p.getNome() + "]: ");
-            String nome = scanner.nextLine();
-            if (!nome.isEmpty()) p.setNome(nome);
-
-            System.out.print("Novo Valor [" + p.getValor() + "]: ");
-            String valorStr = scanner.nextLine().replace(",", ".");
-            if (!valorStr.isEmpty()) p.setValor(Double.parseDouble(valorStr));
-
-            System.out.print("Novo Estoque [" + p.getEstoque() + "]: ");
-            String estoqueStr = scanner.nextLine();
-            if (!estoqueStr.isEmpty()) p.setEstoque(Integer.parseInt(estoqueStr));
-
-            dao.atualizar(p);
-            System.out.println("Peça atualizada!");
-        } else {
-            System.out.println("Peça com ID " + id + " não encontrada.");
-        }
     }
 
-    private static void executarRemocaoPeca(Scanner scanner, PecaDAO dao) {
-        System.out.print("Digite o ID da peça para APAGAR: ");
-        int id = Integer.parseInt(scanner.nextLine());
+    // gerenciamento de estoque de peças, permite cadastrar, editar e excluir
+    public static void gerenciarPecas(Scanner scanner) {
+        PecaDAO dao = new PecaDAO();
 
-        Peca p = dao.buscarPorId(id);
-        if (p != null) {
-            System.out.print("Confirmar exclusão de '" + p.getNome() + "'? (S/N): ");
-            if (scanner.nextLine().equalsIgnoreCase("S")) {
-                dao.deletar(id);
-                System.out.println("🗑️ Peça removida com sucesso.");
-            } else {
-                System.out.println("Remoção cancelada.");
+        while (true) {
+            limparTela();
+            System.out.println("==============================");
+            System.out.println("     Gerenciar Pecas");
+            System.out.println("==============================");
+            System.out.println("1 - Cadastrar peca");
+            System.out.println("2 - Atualizar peca");
+            System.out.println("3 - Excluir peca");
+            System.out.println("4 - Listar pecas");
+            System.out.println("0 - Voltar");
+
+            int opcao = lerInteiro(scanner, "Escolha: ");
+
+            if (opcao == 0) {
+                return;
             }
-        } else {
-            System.out.println("ID não encontrado.");
-        }
-    }
-
-    // op. 6
-    public static void exibirCatalogoDePecas(Scanner scanner){
-        System.out.println("\n--- Catálogo de Peças Cadastradas ---");
-        List<Peca> listaPecas = new PecaDAO().buscarPecas(); // Chama o banco
-
-        if (listaPecas.isEmpty()) {
-            System.out.println("O catálogo está vazio. Cadastre algo primeiro!");
-        } else {
-            // Percorre a lista e imprime cada peça
-            for (Peca p : listaPecas) {
-                System.out.printf("ID: %d | Nome: %-15s | Preço: R$ %8.2f | Estoque: %d unidades%n",
-                        p.getId(), p.getNome(), p.getValor(), p.getEstoque());
-            }
-        }
-        System.out.println("\nPresione ENTER para voltar ao menu...");
-        scanner.nextLine(); // Este cara "segura" a tela para você conseguir ler
-    }
-
-    // op. 7 - corrigido: removido o 'os' do parâmetro, pois ele é criado aqui dentro
-    public static void iniciarFluxoOrcamento(Scanner scanner, VeiculoDAO dao) {
-        System.out.println("\n--- Gerando Orçamento Real ---");
-        System.out.print("Digite a placa do veículo cadastrado: ");
-        String placaBusca = scanner.nextLine().toUpperCase().trim();
-
-        Veiculo vEncontrado = dao.buscarPorPlaca(placaBusca);
-
-        if (vEncontrado == null) {
-            System.out.println("Mentiroso! Não tem veículo.");
-            iniciarFluxoOrcamento(scanner, dao);
-        }
-
-        // criando a OrdemServico aqui
-        OrdemServico novaOS = new OrdemServico(vEncontrado, ServicosGerais.PREVENTIVA);
-
-        System.out.println("Veículo: " + vEncontrado.getModelo());
-
-        // novaOs existe agr!
-        menuIniciarFluxoOrcamento(scanner, novaOS);
-
-        // e no final de tudo, mostramos o "resultado"
-        System.out.println("\n" + novaOS.getResumo());
-    }
-
-    // menu op. 7 - ADICIONADO 'OrdemServico os' nos parâmetros
-    public static void menuIniciarFluxoOrcamento(Scanner scanner, OrdemServico os) {
-        System.out.println("\n=== TIPO DE SERVIÇOS ===");
-        System.out.println("1. " + ServicosGerais.PREVENTIVA.getDescricao());
-        System.out.println("2. " + ServicosGerais.CORRETIVA.getDescricao());
-        System.out.println("3. " + ServicosGerais.ELETRICA.getDescricao());
-        System.out.println("4. " + ServicosGerais.ESTETICA.getDescricao());
-        System.out.println("5. " + ServicosGerais.PNEUS.getDescricao());
-        System.out.print("Escolha uma opção: ");
-
-        try {
-            int tipo = Integer.parseInt(scanner.nextLine());
-            ServicoOrcamento.exibirMenuServicos(scanner, tipo, os);
-        } catch (Exception e) {
-            System.out.println(" Erro no orçamento.");
-        }
-    }
-
-    // menu principal
-    public static void menuPrincipal(Scanner scanner, List<Veiculo> patioDinamico ,VeiculoDAO dao) throws InterruptedException {
-        int opcao = -1;
-        while (opcao != 0) {
-            // menu bem basicao
-            System.out.println("\n--- Oficina do Gui ---");
-            System.out.println("1 - Cadastrar Veículo");
-            System.out.println("2 - Apagar Veículo por Placa");
-            System.out.println("3 - Listar Veículos no Pátio");
-            System.out.println("4 - Atualizar Veículos no Pátio");
-            System.out.println("5 - Cadastrar peça");
-            System.out.println("6 - Vizualizar peças cadastradas");
-            System.out.println("7 - Simular orçamento");
-            System.out.println("0 - Sair");
-            System.out.print("Escolha: ");
 
             try {
-                opcao = Integer.parseInt(scanner.nextLine());
-
                 switch (opcao) {
                     case 1:
-                        System.out.println("oi rs");
-                        cadastrarVeiculo(scanner, patioDinamico, dao);
+                        limparTela();
+                        System.out.println("--- Cadastro de Peca ---");
+                        System.out.print("Nome da peca: ");
+                        String nome = scanner.nextLine().trim();
+                        double valor = lerDouble(scanner, "Valor: ");
+                        int estoque = lerInteiro(scanner, "Estoque: ");
+                        dao.salvar(new Peca(nome, valor, estoque));
+                        System.out.println("Peca cadastrada com sucesso.");
                         break;
 
                     case 2:
-                        removerVeiculoPorPlaca(scanner, patioDinamico, dao);
+                        limparTela();
+                        listarCatalogoPecas();
+                        int idAtualizar = lerInteiro(scanner, "ID da peca para atualizar (0 para voltar): ");
+                        if (idAtualizar == 0) {
+                            break;
+                        }
+                        Peca pecaAtual = dao.buscarPorId(idAtualizar);
+                        if (pecaAtual == null) {
+                            System.out.println("Peca nao encontrada.");
+                            break;
+                        }
+                        // só altera o que o usuário digitar
+                        System.out.print("Novo nome (ENTER para manter '" + pecaAtual.getNome() + "'): ");
+                        String novoNome = scanner.nextLine().trim();
+                        if (!novoNome.isEmpty()) {
+                            pecaAtual.setNome(novoNome);
+                        }
+                        System.out.print("Novo valor (ENTER para manter " + pecaAtual.getValor() + "): ");
+                        String valorStr = scanner.nextLine().trim().replace(",", ".");
+                        if (!valorStr.isEmpty()) {
+                            try {
+                                pecaAtual.setValor(Double.parseDouble(valorStr));
+                            } catch(NumberFormatException e) {
+                                System.out.println("Valor inválido, mantendo o anterior.");
+                            }
+                        }
+                        System.out.print("Novo estoque (ENTER para manter " + pecaAtual.getEstoque() + "): ");
+                        String estStr = scanner.nextLine().trim();
+                        if (!estStr.isEmpty()) {
+                            pecaAtual.setEstoque(Integer.parseInt(estStr));
+                        }
+                        if (dao.atualizar(pecaAtual)) {
+                            System.out.println("Peca atualizada com sucesso.");
+                        } else {
+                            System.out.println("Nao foi possivel atualizar a peca.");
+                        }
                         break;
 
                     case 3:
-                        listarVeiculosNoPatio(scanner, dao);
+                        limparTela();
+                        listarCatalogoPecas();
+                        int idExcluir = lerInteiro(scanner, "ID da peca para excluir (0 para voltar): ");
+                        if (idExcluir == 0) {
+                            break;
+                        }
+                        if (dao.deletar(idExcluir)) {
+                            System.out.println("Peca excluida com sucesso.");
+                        } else {
+                            System.out.println("Peca nao encontrada.");
+                        }
                         break;
 
                     case 4:
-                        atualizarDadosVeiculo(dao, patioDinamico, scanner);
-                        break;
-
-                    case 5:
-                        cadastrarPecaNoCatalogo(scanner);
-                        break;
-
-                    case 6:
-                        exibirCatalogoDePecas(scanner);
-                        break;
-
-                    case 7:
-                        iniciarFluxoOrcamento(scanner, dao);
-                        break;
-                    case 0:
-                        System.out.println("Saindo... Até logo!");
+                        limparTela();
+                        listarCatalogoPecas();
                         break;
 
                     default:
-                        System.out.println("Opção inválida! >:c");
+                        System.out.println("Opcao invalida.");
                 }
-            } catch (Exception e) {
-                // se o usuário digitar uma letra no menu, cai aqui e não fecha o programa
-                System.out.println(" Digite apenas números!");
+            } catch (RuntimeException e) {
+                System.out.println("Erro ao gerenciar pecas: " + e.getMessage());
             }
+
+            pausar(scanner);
         }
-        scanner.close();
+    }
+
+    // apenas visualização do catálogo
+    public static void exibirCatalogoDePecas(Scanner scanner) {
+        limparTela();
+        try {
+            listarCatalogoPecas();
+        } catch (RuntimeException e) {
+            System.out.println("Erro ao carregar catalogo: " + e.getMessage());
+        }
+        pausar(scanner);
+    }
+
+    // inicia a criação de uma simulação de orçamento vinculada a um veículo real
+    public static void iniciarFluxoOrcamento(Scanner scanner, VeiculoDAO dao) {
+        int escopo = selecionarEscopoVeiculo(scanner, "Simular Orcamento");
+        if (escopo == 0) {
+            return;
+        }
+
+        List<Veiculo> lista = buscarPorEscopo(dao, escopo);
+        limparTela();
+        exibirListaSimples(lista);
+
+        if (lista.isEmpty()) {
+            pausar(scanner);
+            return;
+        }
+
+        String placa = lerPlaca(scanner, true);
+        if (placa == null) {
+            return;
+        }
+
+        Veiculo v = dao.buscarPorPlaca(placa);
+        if (v == null) {
+            System.out.println("Veiculo nao encontrado.");
+            pausar(scanner);
+            return;
+        }
+
+        if (!tipoCompativel(v, escopo)) {
+            System.out.println("Veiculo encontrado, mas nao corresponde ao tipo escolhido.");
+            pausar(scanner);
+            return;
+        }
+
+        // cria a ordem de serviço inicial (PREVENTIVA) e abre o menu de customização
+        OrdemServico os = new OrdemServico(v, ServicosGerais.PREVENTIVA);
+        System.out.println("Veiculo: " + v.getModelo() + " - " + v.getPlaca());
+        menuIniciarFluxoOrcamento(scanner, os);
+
+        // exibe o resumo final do orçamento simulado
+        System.out.println(os.getResumo());
+        if (scanner.hasNextLine()) scanner.nextLine();
+        pausar(scanner);
+    }
+
+    // submenu para escolher a categoria de serviço do orçamento (baseado no Enum ServicosGerais)
+    public static void menuIniciarFluxoOrcamento(Scanner scanner, OrdemServico os) {
+        while (true) {
+            System.out.println("1 - Preventiva");
+            System.out.println("2 - Corretiva");
+            System.out.println("3 - Eletrica");
+            System.out.println("4 - Estetica");
+            System.out.println("5 - Pneus");
+            System.out.println("0 - Voltar");
+
+            int tipo = lerInteiro(scanner, "Escolha: ");
+            if (tipo == 0) {
+                return;
+            }
+            if (tipo >= 1 && tipo <= 5) {
+                ServicoOrcamento.exibirMenuServicos(scanner, tipo, os);
+                return;
+            }
+            System.out.println("Opcao invalida.");
+        }
     }
 }
