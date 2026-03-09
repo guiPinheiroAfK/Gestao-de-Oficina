@@ -22,7 +22,7 @@ public class ServicoOrcamento {
                 submenuEstetica(scanner, os);
                 break;
             case 5:
-                submenuPneus(scanner, os); // Agora o método aceita 'os'
+                submenuPneus(scanner, os);
                 break;
             default:
                 System.out.println("Não tinha essa opção...");
@@ -55,7 +55,7 @@ public class ServicoOrcamento {
                 case 0: break;
                 default: System.out.println("Opção inválida!");
             }
-            if(escolhaSub != 0) System.out.println("✅ Adicionado ao orçamento!");
+            if(escolhaSub != 0) System.out.println("Adicionado ao orçamento!");
         }
     }
 
@@ -83,7 +83,7 @@ public class ServicoOrcamento {
                 case 0: break;
                 default: System.out.println("Opção inválida!");
             }
-            if(escolhaSub != 0) System.out.println("✅ Adicionado ao orçamento!");
+            if(escolhaSub != 0) System.out.println("Adicionado ao orçamento!");
         }
     }
 
@@ -109,7 +109,7 @@ public class ServicoOrcamento {
                 case 0: break;
                 default: System.out.println("Opção inválida!");
             }
-            if(escolhaSub != 0) System.out.println("✅ Adicionado ao orçamento!");
+            if(escolhaSub != 0) System.out.println("Adicionado ao orçamento!");
         }
     }
 
@@ -135,7 +135,7 @@ public class ServicoOrcamento {
                 case 0: break;
                 default: System.out.println("Opção inválida!");
             }
-            if(escolhaSub != 0) System.out.println("✅ Adicionado ao orçamento!");
+            if(escolhaSub != 0) System.out.println("Adicionado ao orçamento!");
         }
     }
 
@@ -158,7 +158,7 @@ public class ServicoOrcamento {
                 case 0: break;
                 default: System.out.println("Opção inválida!");
             }
-            if(escolhaSub != 0) System.out.println("✅ Adicionado ao orçamento!");
+            if(escolhaSub != 0) System.out.println("Adicionado ao orçamento!");
         }
     }
 }

@@ -1,8 +1,8 @@
 package modelo;
 
 public class Carro extends Veiculo {
-    public Carro(String placa, String modelo, int ano, String tipo) {
-        super(placa, modelo, ano, tipo);
+    public Carro(String placa, String marca, String modelo, int ano) {
+        super(placa, marca, modelo, ano, "CARRO");
     }
 
     @Override

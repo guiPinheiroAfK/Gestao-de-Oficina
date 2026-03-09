@@ -1,226 +1,161 @@
 package banco;
 
-// DAO - Data Access Object
+// DAO - Data Acess Object
 
-import modelo.*;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import modelo.Moto;
+import modelo.Carro;
+import modelo.Veiculo;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VeiculoDAO {
 
-    // cadastra os veículos
-    public void salvar(Veiculo veiculo, String tipo) {
-        String sql = "INSERT INTO veiculos (placa, modelo, ano, tipo) VALUES (?, ?, ?, ?)";
+    private static final String URL = "jdbc:postgresql://localhost:5433/oficina_db";
+    private static final String USUARIO = "postgres";
+    private static final String SENHA = "admin";
 
-        try (
-                Connection conn = ConnectionFactory.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+    public void salvar(Veiculo v) {
+        String sql = "INSERT INTO veiculos (placa, marca, modelo, ano, tipo) VALUES (?, ?, ?, ?, ?)";
+        try (Connection con = DriverManager.getConnection(URL, USUARIO, SENHA);
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            stmt.setString(1, veiculo.getPlaca());
-            stmt.setString(2, veiculo.getModelo());
-            stmt.setInt(3, veiculo.getAno());
-            stmt.setString(4, tipo);
+            ps.setString(1, v.getPlaca());
+            ps.setString(2, v.getMarca());
+            ps.setString(3, v.getModelo());
+            ps.setInt(4, v.getAno());
+            ps.setString(5, v.getTipo());
 
-            stmt.executeUpdate();
-            System.out.println("Veiculo salvo no banco com sucesso!");
-
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao salvar veiculo: " + e.getMessage());
         }
     }
 
-    // busca eles para serem listados
-    public List<Veiculo> buscarVeiculos() {
-        String sql = "SELECT * FROM veiculos";
+    public boolean atualizar(Veiculo v, String placaAntiga) {
+        String sql = "UPDATE veiculos SET placa = ?, marca = ?, modelo = ?, ano = ? WHERE placa = ?";
+        try (Connection con = DriverManager.getConnection(URL, USUARIO, SENHA);
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)){
+            ps.setString(1, v.getPlaca());
+            ps.setString(2, v.getMarca());
+            ps.setString(3, v.getModelo());
+            ps.setInt(4, v.getAno());
+            ps.setString(5, placaAntiga);
 
-            return converterResultSet(stmt);
-
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar veiculos: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar veiculo: " + e.getMessage());
         }
     }
 
-    // busca por ano
-    public List<Veiculo> buscarPorAno(int ano) {
-        String sql = "SELECT * FROM veiculos WHERE ano = ?";
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, ano);
-            return converterResultSet(stmt);
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar por ano: " + e.getMessage());
-        }
-    }
-
-    public List<Veiculo> buscarPorAnoETipo(int ano, String tipoFiltro) {
-        if (tipoFiltro == null) return buscarPorAno(ano);
-
-        String sql = "SELECT * FROM veiculos WHERE ano = ? AND tipo = ?";
-        List<Veiculo> lista = new ArrayList<>();
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, ano);
-            stmt.setString(2, tipoFiltro);
-            return converterResultSet(stmt);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<Veiculo> buscarOrdenadoPorAno(String tipoFiltro) {
-        // Se tipoFiltro for null, busca todos ordenados. Se não, filtra tipo e ordena.
-        String sql = (tipoFiltro == null)
-                ? "SELECT * FROM veiculos ORDER BY ano ASC"
-                : "SELECT * FROM veiculos WHERE tipo = ? ORDER BY ano ASC";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            if (tipoFiltro != null) {
-                stmt.setString(1, tipoFiltro);
-            }
-
-            return converterResultSet(stmt);
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao ordenar por ano: " + e.getMessage());
-        }
-    }
-
-    // busca por modelo (usa LIKE para encontrar nomes parciais)
-    public List<Veiculo> buscarPorModelo(String modelo) {
-        String sql = "SELECT * FROM veiculos WHERE modelo LIKE ?";
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, "%" + modelo + "%");
-            return converterResultSet(stmt);
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar por modelo: " + e.getMessage());
-        }
-    }
-
-    public List<Veiculo> buscarPorModeloETipo(String modelo, String tipoFiltro) {
-        if (tipoFiltro == null) return buscarPorModelo(modelo);
-
-        String sql = "SELECT * FROM veiculos WHERE modelo LIKE ? AND tipo = ?";
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, "%" + modelo + "%");
-            stmt.setString(2, tipoFiltro);
-            return converterResultSet(stmt);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    // busca por tipo
-    public List<Veiculo> buscarPorTipo(String tipo) {
-        String sql = "SELECT * FROM veiculos WHERE tipo = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, tipo);
-
-            return converterResultSet(stmt);
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar por tipo: " + e.getMessage());
-        }
-    }
-
-    // para evitar repetir o WHILE(RS.NEXT) toda hora
-    private List<Veiculo> converterResultSet(PreparedStatement stmt) throws SQLException {
-        List<Veiculo> lista = new ArrayList<>();
-        try (ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                String tipo = rs.getString("tipo");
-                String placa = rs.getString("placa");
-                String modelo = rs.getString("modelo");
-                int ano = rs.getInt("ano");
-                if (tipo.equalsIgnoreCase("carro")) lista.add(new Carro(placa, modelo, ano, tipo));
-                else lista.add(new Moto(placa, modelo, ano, tipo));
-            }
-        }
-        return lista;
-    }
-
-
-    // deleta veículos por placa:
-    // "DELETE FROM: veiculos WHERE placa = ?"
-    public void deletar(String placa) {
+    public boolean deletar(String placa) {
         String sql = "DELETE FROM veiculos WHERE placa = ?";
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, placa);
-            int rows = stmt.executeUpdate();
-
-            if (rows > 0) {
-                System.out.println("Veiculo deletado com sucesso!");
-            } else
-                System.out.println("Placa não encontrada veiculo!");
-
+        try (Connection con = DriverManager.getConnection(URL, USUARIO, SENHA);
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, placa);
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao deletar: " + e.getMessage());
+            throw new RuntimeException("Erro ao deletar veiculo: " + e.getMessage());
         }
+    }
+
+    public List<Veiculo> buscarVeiculos() {
+        String sql = "SELECT * FROM veiculos ORDER BY tipo, placa";
+        return executarConsulta(sql);
     }
 
     public Veiculo buscarPorPlaca(String placa) {
         String sql = "SELECT * FROM veiculos WHERE placa = ?";
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, placa);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
+        List<Veiculo> resultado = executarConsulta(sql, placa);
+        return resultado.isEmpty() ? null : resultado.get(0);
+    }
+
+    public List<Veiculo> buscarPorTipo(String tipo) {
+        String sql = "SELECT * FROM veiculos WHERE tipo = ? ORDER BY placa";
+        return executarConsulta(sql, tipo);
+    }
+
+    public List<Veiculo> buscarPorAno(int ano) {
+        String sql = "SELECT * FROM veiculos WHERE ano = ? ORDER BY placa";
+        return executarConsulta(sql, ano);
+    }
+
+
+    public List<Veiculo> buscarPorAnoETipo(int ano, String tipoFiltro) {
+        if (tipoFiltro == null || tipoFiltro.isEmpty() || tipoFiltro.equals("AMBOS")) {
+            return buscarPorAno(ano);
+        }
+
+        String sql = "SELECT * FROM veiculos WHERE ano = ? AND tipo = ? ORDER BY placa";
+        return executarConsulta(sql, ano, tipoFiltro);
+    }
+
+    public List<Veiculo> buscarPorModelo(String modelo) {
+        String sql = "SELECT * FROM veiculos WHERE modelo ILIKE ? ORDER BY placa";
+        return executarConsulta(sql, "%" + modelo + "%");
+    }
+
+    public List<Veiculo> buscarPorModeloETipo(String modelo, String tipoFiltro) {
+        // Se o tipo for "Ambos" (null ou vazio), usamos a busca geral por modelo
+        if (tipoFiltro == null || tipoFiltro.isEmpty() || tipoFiltro.equals("AMBOS")) {
+            return buscarPorModelo(modelo);
+        }
+
+        String sql = "SELECT * FROM veiculos WHERE modelo ILIKE ? AND tipo = ? ORDER BY placa";
+        return executarConsulta(sql, "%" + modelo + "%", tipoFiltro);
+    }
+
+    public List<Veiculo> buscarPorMarca(String marca) {
+        String sql = "SELECT * FROM veiculos WHERE marca ILIKE ? ORDER BY placa";
+        return executarConsulta(sql, "%" + marca + "%");
+    }
+
+    public List<Veiculo> buscarPorMarcaETipo(String marca, String tipoFiltro) {
+        // se o tipo for "Ambos" usa a busca geral por marca
+        if (tipoFiltro == null || tipoFiltro.isEmpty() || tipoFiltro.equals("AMBOS")) {
+            return buscarPorMarca(marca);
+        }
+
+        String sql = "SELECT * FROM veiculos WHERE marca ILIKE ? AND tipo = ? ORDER BY placa";
+
+        return executarConsulta(sql, "%" + marca + "%", tipoFiltro);
+    }
+
+    public List<Veiculo> buscarOrdenadoPorAno() {
+        String sql = "SELECT * FROM veiculos ORDER BY ano ASC";
+        return executarConsulta(sql);
+    }
+
+
+    private List<Veiculo> executarConsulta(String sql, Object... parametros) { // Object... para receber nenhum, um ou vários objetos
+        // pode passar qualquer coisa: String, Integer, Double, etc
+        List<Veiculo> lista = new ArrayList<>();
+        try (Connection con = DriverManager.getConnection(URL, USUARIO, SENHA);
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            for (int i = 0; i < parametros.length; i++) {
+                ps.setObject(i + 1, parametros[i]);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
                     String tipo = rs.getString("tipo");
+                    String placa = rs.getString("placa");
+                    String marca = rs.getString("marca");
                     String modelo = rs.getString("modelo");
                     int ano = rs.getInt("ano");
-                    if (tipo.equalsIgnoreCase("carro")) {
-                        return new Carro(placa, modelo, ano, tipo);
+
+                    if ("CARRO".equalsIgnoreCase(tipo)) {
+                        lista.add(new Carro(placa, marca, modelo, ano));
                     } else {
-                        return new Moto(placa, modelo, ano, tipo);
+                        lista.add(new Moto(placa, marca, modelo, ano));
                     }
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar veículo: " + e.getMessage());
+            throw new RuntimeException("Erro na consulta: " + e.getMessage());
         }
-        return null;
-    }
-
-    // nosso querido UPTADE!!!
-    // caso erre o nome, ano ou placa, não podendo alterar o tipo (ainda hehe, mas é simples de implementar)
-    public void atualizar(Veiculo veiculo) {
-        String sql = "UPDATE veiculos SET modelo = ?, ano = ? WHERE placa = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, veiculo.getModelo());
-            stmt.setInt(2, veiculo.getAno());
-            stmt.setString(3, veiculo.getPlaca());
-
-            int linhasAfetadas = stmt.executeUpdate();
-
-            if (linhasAfetadas > 0) {
-                System.out.println("Veiculo atualizado com sucesso!");
-            } else
-                System.out.println("Nenhum veículo encontrada com a placa" + veiculo.getPlaca());
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar veículo: " + e.getMessage());
-        }
+        return lista;
     }
 }
