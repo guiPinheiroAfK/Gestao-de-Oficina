@@ -139,7 +139,6 @@ public class ServicoOrcamento {
         }
     }
 
-    // CORRIGIDO: Adicionado o parâmetro 'OrdemServico os' para resolver o erro da imagem
     public static void submenuPneus(Scanner scanner, OrdemServico os) {
         int escolhaSub = -1;
         while (escolhaSub != 0) {
